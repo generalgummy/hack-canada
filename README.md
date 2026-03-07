@@ -7,7 +7,7 @@ A supply chain platform connecting Canada's northern territories — linking **H
 - **Frontend:** React Native (Expo), React Navigation, Axios, Socket.io-client
 - **Backend:** Node.js, Express.js, Socket.io, Mongoose (MongoDB)
 - **Auth:** JWT + bcrypt + Expo SecureStore
-- **File Storage:** Cloudinary (via multer-storage-cloudinary)
+- **File Storage:** Cloudinary (via multer memory storage)
 - **Database:** MongoDB Atlas
 
 ---
@@ -261,7 +261,7 @@ Edit `frontend/services/api.js` and set:
 
 ```js
 // when running inside docker-compose
-const API_URL = 'http://backend:5001/api';
+const API_URL = "http://backend:5001/api";
 ```
 
 3. Open the Expo Metro URL printed by the frontend container (it will show `exp://<container-ip>:8081`) or open web at `http://localhost:8081` on the host.
@@ -284,7 +284,7 @@ docker ps --filter name=northern-harvest-backend
 docker compose logs -f backend
 ```
 
-```
+````
 
 That's it! The `.env` file is already included in the repo with working credentials.
 
@@ -302,7 +302,8 @@ That's it! The `.env` file is already included in the repo with working credenti
 3. Edit `frontend/services/api.js`:
    ```js
    const API_URL = "https://xxxx-xxx-xxx.ngrok-free.app/api";
-   ```
+````
+
 4. Edit `frontend/services/socket.js`:
    ```js
    const SOCKET_URL = "https://xxxx-xxx-xxx.ngrok-free.app";

@@ -90,9 +90,6 @@ const RegisterScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
-
-      console.log('Sending registration request...');
-      
       // Send registration as JSON first (much more reliable than multipart)
       const registrationData = {
         name,
@@ -115,10 +112,8 @@ const RegisterScreen = ({ navigation }) => {
       }
 
       // Register first without image
-      const result = await register(registrationData, documentImage);
-      
+      await register(registrationData, documentImage);
     } catch (error) {
-      console.log('Registration error details:', error.response?.data || error.message);
       Alert.alert(
         'Registration Failed',
         error.response?.data?.message || error.message || 'Please try again'

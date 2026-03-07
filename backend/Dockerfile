@@ -5,9 +5,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install curl for healthchecks and set production env
+# Set production env
 ENV NODE_ENV=production
-RUN apk add --no-cache curl
 
 # Install dependencies first (better layer caching)
 COPY package.json package-lock.json ./

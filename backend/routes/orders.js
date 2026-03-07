@@ -148,9 +148,7 @@ router.put('/:id/status', protect, restrictTo('hunter', 'supplier'), async (req,
     }
 
     order.status = status;
-    if (note) {
-      order.statusHistory[order.statusHistory.length - 1].note = note;
-    }
+    if (note) order._statusNote = note; // passed to pre-save hook
     if (estimatedDelivery) order.estimatedDelivery = estimatedDelivery;
     if (status === 'delivered') order.deliveredAt = new Date();
 

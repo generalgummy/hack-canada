@@ -24,8 +24,7 @@ export const AuthProvider = ({ children }) => {
       try {
         storedToken = await SecureStore.getItemAsync('token');
       } catch (e) {
-        // expo SecureStore may be unavailable on web — try localStorage as fallback
-        console.log('🗄️ SecureStore unavailable, falling back to localStorage', e.message);
+        // SecureStore may be unavailable on web — try localStorage as fallback
         if (typeof window !== 'undefined' && window.localStorage) {
           storedToken = window.localStorage.getItem('token');
         }
@@ -55,7 +54,6 @@ export const AuthProvider = ({ children }) => {
   const login = async (phone, password) => {
     const res = await api.post('/auth/login', { phone, password });
     const { userId, phone: userPhone } = res.data;
-    console.log('🔐 login: pending OTP set', { userId, phone: userPhone });
     setPendingOtp({ userId, phone: userPhone, source: 'login' });
     return res.data;
   };
@@ -63,7 +61,6 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData, documentImage) => {
     const res = await api.post('/auth/register', userData);
     const { userId, phone } = res.data;
-    console.log('📝 register: pending OTP set', { userId, phone });
     setPendingOtp({ userId, phone, source: 'register', documentImage });
     return res.data;
   };
@@ -71,17 +68,14 @@ export const AuthProvider = ({ children }) => {
   const verifyOtp = async (otp) => {
     if (!pendingOtp) throw new Error('No pending OTP verification');
 
-    console.log('🔐 verifyOtp: sending verify request', { userId: pendingOtp.userId, otp });
     const res = await api.post('/auth/verify-otp', {
       userId: pendingOtp.userId,
       otp,
     });
     const { token: newToken, user: newUser } = res.data;
-    console.log('🔑 verifyOtp: received token and user', { tokenPresent: !!newToken, userId: newUser?._id });
     try {
       await SecureStore.setItemAsync('token', newToken);
     } catch (e) {
-      console.log('🗄️ SecureStore.setItemAsync failed, using localStorage fallback', e.message);
       if (typeof window !== 'undefined' && window.localStorage) {
         window.localStorage.setItem('token', newToken);
       }
@@ -117,7 +111,6 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    console.log('🔐 verifyOtp: clearing pendingOtp');
     setPendingOtp(null);
     return newUser;
   };

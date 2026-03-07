@@ -6,8 +6,6 @@ const { uploadDocument, uploadToCloudinary, getDocumentFolder } = require('../co
 
 // POST /api/auth/register
 router.post('/register', (req, res, next) => {
-  console.log('📥 Register request received');
-  console.log('📦 Content-Type:', req.headers['content-type']);
   // If it's a multipart request, use multer; otherwise skip to next
   if (req.headers['content-type']?.includes('multipart')) {
     uploadDocument.single('documentImage')(req, res, next);
@@ -16,8 +14,6 @@ router.post('/register', (req, res, next) => {
   }
 }, async (req, res) => {
   try {
-    console.log('📋 Form fields:', Object.keys(req.body));
-    console.log('📎 File:', req.file ? `${req.file.originalname} (${req.file.size} bytes)` : 'No file');
     const {
       name,
       email,
@@ -156,8 +152,6 @@ router.post('/verify-otp', async (req, res) => {
   try {
     const { userId, otp } = req.body;
 
-    console.log('🔐 Verify OTP request received', { userId, otp });
-
     if (!userId || !otp) {
       return res.status(400).json({ message: 'Please provide userId and OTP' });
     }
@@ -166,9 +160,6 @@ router.post('/verify-otp', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
-    console.log('🔎 Found user for OTP verification:', { id: user._id.toString() });
-    console.log('🔐 Stored OTP and expiry:', { otp: user.otp, otpExpires: user.otpExpires });
 
     if (!user.otp || !user.otpExpires) {
       return res.status(400).json({ message: 'No OTP requested. Please login again.' });
@@ -179,7 +170,6 @@ router.post('/verify-otp', async (req, res) => {
     }
 
     if (user.otp !== otp) {
-      console.log('❌ Invalid OTP provided');
       return res.status(400).json({ message: 'Invalid OTP' });
     }
 
@@ -190,7 +180,6 @@ router.post('/verify-otp', async (req, res) => {
     user.lastSeen = new Date();
     await user.save({ validateBeforeSave: false });
 
-    console.log('✅ OTP verified for user:', user._id.toString());
     const token = signToken(user);
 
     const userResponse = user.toObject();
@@ -250,8 +239,6 @@ router.put('/upload-document', protect, uploadDocument.single('documentImage'), 
       return res.status(400).json({ message: 'No document image provided' });
     }
 
-    console.log('📎 Document upload received:', req.file.originalname, `(${req.file.size} bytes)`);
-
     const folder = getDocumentFolder(req.user.userType);
     const result = await uploadToCloudinary(req.file.buffer, folder);
 
@@ -264,7 +251,7 @@ router.put('/upload-document', protect, uploadDocument.single('documentImage'), 
       { new: true }
     );
 
-    console.log('✅ Document uploaded to Cloudinary:', result.secure_url);
+    console.log('✅ Document uploaded to Cloudinary');
     res.json({ user });
   } catch (error) {
     console.error('Document upload error:', error);

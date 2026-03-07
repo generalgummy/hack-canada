@@ -72,7 +72,7 @@ orderSchema.pre('save', function (next) {
     this.statusHistory.push({
       status: this.status,
       timestamp: new Date(),
-      note: `Status changed to ${this.status}`,
+      note: this._statusNote || `Status changed to ${this.status}`,
     });
   }
   next();

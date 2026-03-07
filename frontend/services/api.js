@@ -31,10 +31,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expired — could trigger logout
-      console.log('Unauthorized — token may be expired');
-    }
+    // 401 errors are handled by screen-level error handlers
     return Promise.reject(error);
   }
 );
@@ -54,10 +51,8 @@ export const setAuthToken = (token) => {
 export const loginAPI = (phone, password) =>
   api.post('/auth/login', { phone, password });
 
-export const registerAPI = (formData) =>
-  api.post('/auth/register', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+export const registerAPI = (userData) =>
+  api.post('/auth/register', userData);
 
 export const verifyOtpAPI = (userId, otp) =>
   api.post('/auth/verify-otp', { userId, otp });
