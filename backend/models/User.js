@@ -28,7 +28,21 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
+      required: [true, 'Please provide your phone number'],
+      unique: true,
       trim: true,
+    },
+    otp: {
+      type: String,
+      select: false,
+    },
+    otpExpires: {
+      type: Date,
+      select: false,
+    },
+    isPhoneVerified: {
+      type: Boolean,
+      default: false,
     },
     location: {
       type: String,

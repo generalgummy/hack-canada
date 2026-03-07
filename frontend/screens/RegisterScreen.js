@@ -83,57 +83,40 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   const handleRegister = async () => {
-    if (!name || !email || !password) {
-      Alert.alert('Error', 'Please fill in all required fields');
+    if (!name || !email || !phone || !password) {
+      Alert.alert('Error', 'Please fill in all required fields (name, email, phone, password)');
       return;
     }
 
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('name', name);
-      formData.append('email', email.toLowerCase().trim());
-      formData.append('password', password);
-      formData.append('userType', userType);
-      formData.append('phone', phone);
-      formData.append('location', location);
 
-      // Type-specific fields
+      console.log('Sending registration request...');
+      
+      // Send registration as JSON first (much more reliable than multipart)
+      const registrationData = {
+        name,
+        email: email.toLowerCase().trim(),
+        password,
+        userType,
+        phone,
+        location,
+      };
+      
       if (userType === 'hunter') {
-        formData.append('hunterLicenseNumber', hunterLicenseNumber);
+        registrationData.hunterLicenseNumber = hunterLicenseNumber;
       } else if (userType === 'community') {
-        formData.append('organizationType', organizationType);
-        formData.append('communitySize', communitySize);
-        formData.append('address', address);
+        registrationData.organizationType = organizationType;
+        registrationData.communitySize = communitySize;
+        registrationData.address = address;
       } else if (userType === 'supplier') {
-        formData.append('businessName', businessName);
-        formData.append('businessRegistrationNumber', businessRegistrationNumber);
+        registrationData.businessName = businessName;
+        registrationData.businessRegistrationNumber = businessRegistrationNumber;
       }
 
-      // Document image
-      if (documentImage) {
-        const uri = documentImage.uri;
-        const mimeType = documentImage.mimeType || documentImage.type || 'image/jpeg';
-        const extMap = {
-          'image/jpeg': 'jpg',
-          'image/png': 'png',
-          'image/gif': 'gif',
-          'image/webp': 'webp',
-          'image/heic': 'heic',
-          'image/heif': 'heif',
-          'image/bmp': 'bmp',
-          'image/tiff': 'tiff',
-          'image/svg+xml': 'svg',
-        };
-        const ext = extMap[mimeType] || mimeType.split('/').pop() || 'jpg';
-        formData.append('documentImage', {
-          uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri,
-          type: mimeType,
-          name: `document.${ext}`,
-        });
-      }
-
-      await register(formData);
+      // Register first without image
+      const result = await register(registrationData, documentImage);
+      
     } catch (error) {
       console.log('Registration error details:', error.response?.data || error.message);
       Alert.alert(
@@ -208,7 +191,7 @@ const RegisterScreen = ({ navigation }) => {
       <Text style={styles.label}>Password *</Text>
       <TextInput style={styles.input} value={password} onChangeText={setPassword} placeholder="Min 6 characters" secureTextEntry />
 
-      <Text style={styles.label}>Phone</Text>
+      <Text style={styles.label}>Phone *</Text>
       <TextInput style={styles.input} value={phone} onChangeText={setPhone} placeholder="Phone number" keyboardType="phone-pad" />
 
       <Text style={styles.label}>Location (City / Territory)</Text>

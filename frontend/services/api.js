@@ -2,13 +2,13 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 // ⚠️ Change this to your backend URL
-// For physical device: use your computer's local IP (e.g., http://192.168.1.100:5000)
-// For Expo Go on same machine: http://localhost:5000
-const API_URL = 'http://10.200.8.149:5001/api';
+// For tunnel mode: use the ngrok URL
+// For Expo Go on same machine: http://localhost:5001
+const API_URL = 'https://e6ef-192-159-180-156.ngrok-free.app/api';
 
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 15000,
+  timeout: 30000,
 });
 
 // Request interceptor — attach JWT
@@ -51,13 +51,19 @@ export const setAuthToken = (token) => {
 // ==========================================
 // Auth API
 // ==========================================
-export const loginAPI = (email, password) =>
-  api.post('/auth/login', { email, password });
+export const loginAPI = (phone, password) =>
+  api.post('/auth/login', { phone, password });
 
 export const registerAPI = (formData) =>
   api.post('/auth/register', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
+
+export const verifyOtpAPI = (userId, otp) =>
+  api.post('/auth/verify-otp', { userId, otp });
+
+export const resendOtpAPI = (userId) =>
+  api.post('/auth/resend-otp', { userId });
 
 export const getMeAPI = () => api.get('/auth/me');
 

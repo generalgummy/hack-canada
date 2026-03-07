@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [pendingOtp, setPendingOtp] = useState(null); // { userId, phone, source: 'login'|'register', documentImage? }
 
   // Auto-login on app reload
   useEffect(() => {
@@ -36,28 +37,71 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
-    const { token: newToken, user: userData } = res.data;
-    await SecureStore.setItemAsync('token', newToken);
-    setAuthToken(newToken);
-    setToken(newToken);
-    setUser(userData);
-    connectSocket(newToken);
-    return userData;
+  const login = async (phone, password) => {
+    const res = await api.post('/auth/login', { phone, password });
+    const { userId, phone: userPhone } = res.data;
+    setPendingOtp({ userId, phone: userPhone, source: 'login' });
+    return res.data;
   };
 
-  const register = async (formData) => {
-    const res = await api.post('/auth/register', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+  const register = async (userData, documentImage) => {
+    const res = await api.post('/auth/register', userData);
+    const { userId, phone } = res.data;
+    setPendingOtp({ userId, phone, source: 'register', documentImage });
+    return res.data;
+  };
+
+  const verifyOtp = async (otp) => {
+    if (!pendingOtp) throw new Error('No pending OTP verification');
+
+    const res = await api.post('/auth/verify-otp', {
+      userId: pendingOtp.userId,
+      otp,
     });
-    const { token: newToken, user: userData } = res.data;
+    const { token: newToken, user: newUser } = res.data;
     await SecureStore.setItemAsync('token', newToken);
     setAuthToken(newToken);
     setToken(newToken);
-    setUser(userData);
+    setUser(newUser);
     connectSocket(newToken);
-    return userData;
+
+    // Upload document image in background if this was registration
+    if (pendingOtp.source === 'register' && pendingOtp.documentImage) {
+      try {
+        const docImage = pendingOtp.documentImage;
+        const formData = new FormData();
+        const uri = docImage.uri;
+        const mimeType = docImage.mimeType || docImage.type || 'image/jpeg';
+        const ext = mimeType.split('/').pop() || 'jpg';
+        formData.append('documentImage', {
+          uri,
+          type: mimeType,
+          name: `document.${ext}`,
+        });
+
+        const uploadRes = await api.put('/auth/upload-document', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 60000,
+        });
+        if (uploadRes.data?.user) {
+          setUser(uploadRes.data.user);
+        }
+      } catch (uploadError) {
+        console.log('Document upload failed (can retry later):', uploadError.message);
+      }
+    }
+
+    setPendingOtp(null);
+    return newUser;
+  };
+
+  const resendOtp = async () => {
+    if (!pendingOtp) throw new Error('No pending OTP verification');
+    await api.post('/auth/resend-otp', { userId: pendingOtp.userId });
+  };
+
+  const cancelOtp = () => {
+    setPendingOtp(null);
   };
 
   const logout = async () => {
@@ -78,8 +122,12 @@ export const AuthProvider = ({ children }) => {
         user,
         token,
         loading,
+        pendingOtp,
         login,
         register,
+        verifyOtp,
+        resendOtp,
+        cancelOtp,
         logout,
         updateUser,
       }}

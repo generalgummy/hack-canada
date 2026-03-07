@@ -1,5 +1,4 @@
 const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
 
 cloudinary.config({
@@ -8,89 +7,50 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Storage for hunter license / ID documents
-const hunterDocStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'northern-harvest/hunter-ids',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
-    transformation: [{ width: 1200, crop: 'limit' }],
-  },
+// Use memory storage — much more reliable with React Native uploads
+const memoryStorage = multer.memoryStorage();
+
+const uploadDocument = multer({
+  storage: memoryStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
 });
 
-// Storage for community proof documents
-const communityDocStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'northern-harvest/community-proofs',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
-    transformation: [{ width: 1200, crop: 'limit' }],
-  },
+const uploadListingImages = multer({
+  storage: memoryStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 
-// Storage for supplier business documents
-const supplierDocStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'northern-harvest/supplier-docs',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
-    transformation: [{ width: 1200, crop: 'limit' }],
-  },
-});
-
-// Storage for listing product images
-const listingImageStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'northern-harvest/listings',
-    allowed_formats: ['jpg', 'jpeg', 'png'],
-    transformation: [{ width: 1200, crop: 'limit' }],
-  },
-});
-
-// Dynamic document upload based on user type
-const getDocumentUploader = (userType) => {
-  let storage;
-  switch (userType) {
-    case 'hunter':
-      storage = hunterDocStorage;
-      break;
-    case 'community':
-      storage = communityDocStorage;
-      break;
-    case 'supplier':
-      storage = supplierDocStorage;
-      break;
-    default:
-      storage = hunterDocStorage;
-  }
-  return multer({ storage });
+// Helper: upload a buffer to Cloudinary
+const uploadToCloudinary = (fileBuffer, folder) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        transformation: [{ width: 1200, crop: 'limit' }],
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    stream.end(fileBuffer);
+  });
 };
 
-// General document uploader — determines folder dynamically from req.body.userType
-const documentStorage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => {
-    const userType = req.body.userType || 'general';
-    const folderMap = {
-      hunter: 'northern-harvest/hunter-ids',
-      community: 'northern-harvest/community-proofs',
-      supplier: 'northern-harvest/supplier-docs',
-    };
-    return {
-      folder: folderMap[userType] || 'northern-harvest/documents',
-      allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
-      transformation: [{ width: 1200, crop: 'limit' }],
-    };
-  },
-});
-
-const uploadDocument = multer({ storage: documentStorage });
-const uploadListingImages = multer({ storage: listingImageStorage });
+// Get the right folder based on user type
+const getDocumentFolder = (userType) => {
+  const folderMap = {
+    hunter: 'northern-harvest/hunter-ids',
+    community: 'northern-harvest/community-proofs',
+    supplier: 'northern-harvest/supplier-docs',
+  };
+  return folderMap[userType] || 'northern-harvest/documents';
+};
 
 module.exports = {
   cloudinary,
   uploadDocument,
   uploadListingImages,
-  getDocumentUploader,
+  uploadToCloudinary,
+  getDocumentFolder,
 };

@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 // Auth Screens
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
+import OTPScreen from './screens/OTPScreen';
 
 // Dashboard Screens
 import HunterDashboard from './screens/HunterDashboard';
@@ -90,7 +91,7 @@ const MainTabs = () => {
 // Root Navigation
 // ==========================================
 const RootNavigator = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, pendingOtp } = useAuth();
 
   if (loading) {
     return (
@@ -149,6 +150,11 @@ const RootNavigator = () => {
               headerStyle: { backgroundColor: '#fff' },
             }}
           />
+        </>
+      ) : pendingOtp ? (
+        // OTP Verification Screen
+        <>
+          <Stack.Screen name="OTPVerification" component={OTPScreen} />
         </>
       ) : (
         // Auth Screens

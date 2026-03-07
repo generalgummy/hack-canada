@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Listing = require('../models/Listing');
 const { protect, restrictTo } = require('../middleware/auth');
-const { uploadListingImages } = require('../config/cloudinary');
+const { uploadListingImages, uploadToCloudinary } = require('../config/cloudinary');
 
 // GET /api/listings — Browse all available listings
 router.get('/', protect, async (req, res) => {
@@ -102,9 +102,13 @@ router.post(
 
       // Handle image uploads
       if (req.files && req.files.length > 0) {
-        listingData.images = req.files.map((file) => ({
-          url: file.path,
-          publicId: file.filename,
+        const uploadPromises = req.files.map((file) =>
+          uploadToCloudinary(file.buffer, 'northern-harvest/listings')
+        );
+        const results = await Promise.all(uploadPromises);
+        listingData.images = results.map((r) => ({
+          url: r.secure_url,
+          publicId: r.public_id,
         }));
       }
 
@@ -144,9 +148,13 @@ router.put('/:id', protect, uploadListingImages.array('images', 4), async (req, 
 
     // Handle new image uploads
     if (req.files && req.files.length > 0) {
-      const newImages = req.files.map((file) => ({
-        url: file.path,
-        publicId: file.filename,
+      const uploadPromises = req.files.map((file) =>
+        uploadToCloudinary(file.buffer, 'northern-harvest/listings')
+      );
+      const results = await Promise.all(uploadPromises);
+      const newImages = results.map((r) => ({
+        url: r.secure_url,
+        publicId: r.public_id,
       }));
       updates.images = [...(listing.images || []), ...newImages];
     }

@@ -15,18 +15,18 @@ import { useAuth } from '../context/AuthContext';
 
 const LoginScreen = ({ navigation }) => {
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter email and password');
+    if (!phone || !password) {
+      Alert.alert('Error', 'Please enter phone number and password');
       return;
     }
     setLoading(true);
     try {
-      await login(email.toLowerCase().trim(), password);
+      await login(phone.trim(), password);
     } catch (error) {
       Alert.alert(
         'Login Failed',
@@ -55,13 +55,13 @@ const LoginScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>Phone Number</Text>
           <TextInput
             style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="your@email.com"
-            keyboardType="email-address"
+            value={phone}
+            onChangeText={setPhone}
+            placeholder="Enter your phone number"
+            keyboardType="phone-pad"
             autoCapitalize="none"
             autoCorrect={false}
           />

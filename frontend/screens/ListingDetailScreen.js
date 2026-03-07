@@ -10,6 +10,11 @@ import {
   ActivityIndicator,
   TextInput,
   Modal,
+  Keyboard,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { getListingAPI, expressInterestAPI, createOrderAPI } from '../services/api';
@@ -241,8 +246,13 @@ const ListingDetailScreen = ({ route, navigation }) => {
 
       {/* Order Modal */}
       <Modal visible={orderModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalOverlay}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
+              <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+                <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Place Order</Text>
             <Text style={styles.modalSubtitle}>{listing.title}</Text>
 
@@ -300,8 +310,11 @@ const ListingDetailScreen = ({ route, navigation }) => {
                 )}
               </TouchableOpacity>
             </View>
+            </View>
+              </TouchableWithoutFeedback>
+            </KeyboardAvoidingView>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );
@@ -310,7 +323,7 @@ const ListingDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F9F5' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  heroImage: { width: 400, height: 250, resizeMode: 'cover' },
+  heroImage: { width: Dimensions.get('window').width, height: 250, resizeMode: 'cover' },
   imagePlaceholder: {
     height: 200, backgroundColor: '#E8F5E9', justifyContent: 'center', alignItems: 'center',
   },
@@ -366,7 +379,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    padding: 24, maxHeight: '80%',
+    padding: 24, paddingBottom: 40, maxHeight: '85%',
   },
   modalTitle: { fontSize: 20, fontWeight: '800', color: '#1B5E20', marginBottom: 4 },
   modalSubtitle: { fontSize: 14, color: '#666', marginBottom: 16 },
@@ -375,10 +388,10 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 12, fontSize: 15, backgroundColor: '#FAFAFA',
   },
   totalPrice: { fontSize: 18, fontWeight: '700', color: '#2E7D32', marginTop: 12, textAlign: 'right' },
-  modalActions: { flexDirection: 'row', gap: 10, marginTop: 20 },
+  modalActions: { flexDirection: 'row', gap: 10, marginTop: 20, marginBottom: 10 },
   cancelButton: {
     flex: 1, paddingVertical: 14, alignItems: 'center', borderRadius: 10,
-    borderWidth: 1, borderColor: '#ddd',
+    borderWidth: 1, borderColor: '#ddd', backgroundColor: '#fff',
   },
   cancelButtonText: { fontSize: 15, fontWeight: '600', color: '#666' },
   confirmButton: {

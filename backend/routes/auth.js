@@ -2,11 +2,22 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const { signToken, protect } = require('../middleware/auth');
-const { uploadDocument } = require('../config/cloudinary');
+const { uploadDocument, uploadToCloudinary, getDocumentFolder } = require('../config/cloudinary');
 
 // POST /api/auth/register
-router.post('/register', uploadDocument.single('documentImage'), async (req, res) => {
+router.post('/register', (req, res, next) => {
+  console.log('📥 Register request received');
+  console.log('📦 Content-Type:', req.headers['content-type']);
+  // If it's a multipart request, use multer; otherwise skip to next
+  if (req.headers['content-type']?.includes('multipart')) {
+    uploadDocument.single('documentImage')(req, res, next);
+  } else {
+    next();
+  }
+}, async (req, res) => {
   try {
+    console.log('📋 Form fields:', Object.keys(req.body));
+    console.log('📎 File:', req.file ? `${req.file.originalname} (${req.file.size} bytes)` : 'No file');
     const {
       name,
       email,
@@ -27,8 +38,14 @@ router.post('/register', uploadDocument.single('documentImage'), async (req, res
     } = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ phone });
     if (existingUser) {
+      return res.status(400).json({ message: 'Phone number already registered' });
+    }
+
+    // Also check email
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
       return res.status(400).json({ message: 'Email already registered' });
     }
 
@@ -44,8 +61,15 @@ router.post('/register', uploadDocument.single('documentImage'), async (req, res
 
     // Attach Cloudinary image if uploaded
     if (req.file) {
-      userData.documentImageUrl = req.file.path;
-      userData.documentPublicId = req.file.filename;
+      try {
+        const folder = getDocumentFolder(userType);
+        const result = await uploadToCloudinary(req.file.buffer, folder);
+        userData.documentImageUrl = result.secure_url;
+        userData.documentPublicId = result.public_id;
+      } catch (uploadError) {
+        console.error('Cloudinary upload error:', uploadError);
+        // Continue registration without image rather than failing
+      }
     }
 
     // Add type-specific fields
@@ -68,32 +92,41 @@ router.post('/register', uploadDocument.single('documentImage'), async (req, res
 
     const user = await User.create(userData);
 
-    const token = signToken(user);
+    // Generate OTP and send to phone
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otp = otp;
+    user.otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    await user.save({ validateBeforeSave: false });
+
+    console.log(`\n📲 OTP for ${user.phone}: ${otp}\n`);
 
     // Remove password from response
     const userResponse = user.toObject();
     delete userResponse.password;
+    delete userResponse.otp;
+    delete userResponse.otpExpires;
 
-    res.status(201).json({ token, user: userResponse });
+    res.status(201).json({ userId: user._id, phone: user.phone, message: 'OTP sent to your phone' });
   } catch (error) {
     console.error('Registration error:', error);
     if (error.code === 11000) {
-      return res.status(400).json({ message: 'Email already registered' });
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({ message: `${field === 'phone' ? 'Phone number' : 'Email'} already registered` });
     }
     res.status(500).json({ message: 'Registration failed', error: error.message });
   }
 });
 
-// POST /api/auth/login
+// POST /api/auth/login — Step 1: verify phone + password, send OTP
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { phone, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Please provide email and password' });
+    if (!phone || !password) {
+      return res.status(400).json({ message: 'Please provide phone number and password' });
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ phone }).select('+password');
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -103,7 +136,51 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Update lastSeen
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otp = otp;
+    user.otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    await user.save({ validateBeforeSave: false });
+
+    console.log(`\n📲 OTP for ${user.phone}: ${otp}\n`);
+
+    res.json({ userId: user._id, phone: user.phone, message: 'OTP sent to your phone' });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Login failed', error: error.message });
+  }
+});
+
+// POST /api/auth/verify-otp — Step 2: verify OTP and return token
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { userId, otp } = req.body;
+
+    if (!userId || !otp) {
+      return res.status(400).json({ message: 'Please provide userId and OTP' });
+    }
+
+    const user = await User.findById(userId).select('+otp +otpExpires');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (!user.otp || !user.otpExpires) {
+      return res.status(400).json({ message: 'No OTP requested. Please login again.' });
+    }
+
+    if (new Date() > user.otpExpires) {
+      return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+
+    // Clear OTP and mark phone as verified
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    user.isPhoneVerified = true;
     user.lastSeen = new Date();
     await user.save({ validateBeforeSave: false });
 
@@ -111,11 +188,41 @@ router.post('/login', async (req, res) => {
 
     const userResponse = user.toObject();
     delete userResponse.password;
+    delete userResponse.otp;
+    delete userResponse.otpExpires;
 
     res.json({ token, user: userResponse });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Login failed', error: error.message });
+    console.error('OTP verification error:', error);
+    res.status(500).json({ message: 'OTP verification failed', error: error.message });
+  }
+});
+
+// POST /api/auth/resend-otp — Resend OTP
+router.post('/resend-otp', async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'Please provide userId' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otp = otp;
+    user.otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+    await user.save({ validateBeforeSave: false });
+
+    console.log(`\n📲 Resent OTP for ${user.phone}: ${otp}\n`);
+
+    res.json({ message: 'OTP resent to your phone' });
+  } catch (error) {
+    console.error('Resend OTP error:', error);
+    res.status(500).json({ message: 'Failed to resend OTP', error: error.message });
   }
 });
 
@@ -126,6 +233,35 @@ router.get('/me', protect, async (req, res) => {
     res.json({ user });
   } catch (error) {
     res.status(500).json({ message: 'Failed to get user', error: error.message });
+  }
+});
+
+// PUT /api/auth/upload-document — upload document image after registration
+router.put('/upload-document', protect, uploadDocument.single('documentImage'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No document image provided' });
+    }
+
+    console.log('📎 Document upload received:', req.file.originalname, `(${req.file.size} bytes)`);
+
+    const folder = getDocumentFolder(req.user.userType);
+    const result = await uploadToCloudinary(req.file.buffer, folder);
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        documentImageUrl: result.secure_url,
+        documentPublicId: result.public_id,
+      },
+      { new: true }
+    );
+
+    console.log('✅ Document uploaded to Cloudinary:', result.secure_url);
+    res.json({ user });
+  } catch (error) {
+    console.error('Document upload error:', error);
+    res.status(500).json({ message: 'Document upload failed', error: error.message });
   }
 });
 
@@ -145,8 +281,14 @@ router.put('/me', protect, uploadDocument.single('documentImage'), async (req, r
 
     // Handle Cloudinary image update
     if (req.file) {
-      updates.documentImageUrl = req.file.path;
-      updates.documentPublicId = req.file.filename;
+      try {
+        const folder = getDocumentFolder(req.user.userType);
+        const result = await uploadToCloudinary(req.file.buffer, folder);
+        updates.documentImageUrl = result.secure_url;
+        updates.documentPublicId = result.public_id;
+      } catch (uploadError) {
+        console.error('Cloudinary upload error:', uploadError);
+      }
     }
 
     const user = await User.findByIdAndUpdate(req.user._id, updates, {

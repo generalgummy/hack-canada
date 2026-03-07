@@ -200,3 +200,132 @@ hack-canada/
 ## License
 
 Built for Hack Canada 🇨🇦
+
+---
+
+## 🐳 Docker Setup
+
+Run the entire backend + tunnel with a single command using Docker Compose.
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- A configured `backend/.env` file (see [Configure Backend Environment](#2-configure-backend-environment) above)
+- *(Optional)* An [ngrok account](https://dashboard.ngrok.com/signup) for a stable tunnel URL
+
+### Quick Start (Backend + ngrok Tunnel)
+
+```bash
+# 1. Clone the repo and enter it
+git clone https://github.com/generalgummy/hack-canada.git
+cd hack-canada
+
+# 2. Set up your backend/.env (copy example and fill in your values)
+cp backend/.env.example backend/.env
+# Edit backend/.env with your MongoDB, Cloudinary, and JWT credentials
+
+# 3. (Optional but recommended) Set ngrok auth token for a stable tunnel
+#    Get your free token from https://dashboard.ngrok.com/get-started/your-authtoken
+export NGROK_AUTHTOKEN=your_ngrok_auth_token_here
+
+# 4. Start everything
+docker compose up --build
+```
+
+This starts:
+- **Backend API** on `http://localhost:5001`
+- **ngrok tunnel** with a public HTTPS URL (check `http://localhost:4040` to find it)
+
+### Finding Your ngrok Public URL
+
+After `docker compose up`, open **http://localhost:4040** in your browser. You'll see the ngrok dashboard showing your public URL, e.g.:
+
+```
+https://xxxx-xxx-xxx-xxx-xxx.ngrok-free.app
+```
+
+Copy this URL and update the frontend:
+
+1. Edit `frontend/services/api.js` — set `API_URL` to `https://YOUR-URL.ngrok-free.app/api`
+2. Edit `frontend/services/socket.js` — set `SOCKET_URL` to `https://YOUR-URL.ngrok-free.app`
+
+### Using a Stable ngrok Domain (Recommended)
+
+Free ngrok tunnels get a random URL every restart. To fix this:
+
+1. Sign up at [ngrok.com](https://ngrok.com) (free)
+2. Go to **Domains** → claim a free static domain (e.g., `my-app.ngrok-free.app`)
+3. Set your auth token:
+   ```bash
+   export NGROK_AUTHTOKEN=your_token_here
+   ```
+4. Update `docker-compose.yml` ngrok command:
+   ```yaml
+   command: ["http", "backend:5001", "--domain=my-app.ngrok-free.app", "--log=stdout"]
+   ```
+5. Now the URL never changes — set it once in `api.js` and `socket.js` and forget about it!
+
+### Running the Frontend
+
+The frontend is a React Native (Expo) app that runs on your **physical phone** via Expo Go — it can't run inside Docker. Run it locally:
+
+```bash
+cd frontend
+npm install
+npx expo start --tunnel
+```
+
+Scan the QR code with Expo Go on your phone.
+
+### Running Frontend in Docker (Optional)
+
+If you want to run the Expo dev server in Docker too:
+
+```bash
+docker compose --profile with-frontend up --build
+```
+
+### Docker Commands Reference
+
+```bash
+# Start services (backend + ngrok)
+docker compose up --build
+
+# Start in background (detached)
+docker compose up --build -d
+
+# View logs
+docker compose logs -f
+
+# View only backend logs (to see OTP codes)
+docker compose logs -f backend
+
+# Stop everything
+docker compose down
+
+# Rebuild after code changes
+docker compose up --build
+
+# Remove everything (containers + images)
+docker compose down --rmi all
+```
+
+### Docker Environment Variables
+
+| Variable         | Where to Set     | Description                          |
+| ---------------- | ---------------- | ------------------------------------ |
+| `MONGO_URI`      | `backend/.env`   | MongoDB Atlas connection string      |
+| `JWT_SECRET`     | `backend/.env`   | JWT signing secret                   |
+| `CLOUDINARY_*`   | `backend/.env`   | Cloudinary credentials (3 values)    |
+| `PORT`           | `backend/.env`   | Backend port (default: `5001`)       |
+| `NGROK_AUTHTOKEN`| Shell / `.env`   | ngrok auth token (optional but recommended) |
+
+### Troubleshooting Docker
+
+| Issue                          | Fix                                                            |
+| ------------------------------ | -------------------------------------------------------------- |
+| `port 5001 already in use`     | Stop local backend: `lsof -ti:5001 \| xargs kill -9`          |
+| ngrok says `too many sessions` | Free plan allows 1 tunnel — stop any local ngrok first         |
+| Can't connect from phone       | Check ngrok URL at `http://localhost:4040`, update `api.js`    |
+| Backend won't start            | Check `backend/.env` exists with valid MongoDB URI             |
+| OTP not showing                | Run `docker compose logs -f backend` to see OTP in logs        |
