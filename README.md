@@ -230,6 +230,62 @@ cd hack-canada
 docker compose up --build
 ```
 
+### Run only the backend (fast iteration)
+
+```bash
+# build & start only backend service
+docker compose up --build backend
+
+# or in background
+docker compose up -d --build backend
+
+# follow backend logs
+docker compose logs -f backend
+```
+
+### Run backend + frontend together (Expo in Docker)
+
+> Note: the frontend service runs the Expo dev server inside the container. When the frontend runs in Docker it cannot reach `http://localhost:5001` on the host — inside Compose the backend is reachable at `http://backend:5001`.
+
+1. Start both services (frontend is behind a profile `with-frontend`):
+
+```bash
+docker compose --profile with-frontend up --build
+# or detached
+docker compose --profile with-frontend up -d --build
+```
+
+2. If you run the frontend inside Docker you should update the API base URL used by the app (temporary change for containerized frontend):
+
+Edit `frontend/services/api.js` and set:
+
+```js
+// when running inside docker-compose
+const API_URL = 'http://backend:5001/api';
+```
+
+3. Open the Expo Metro URL printed by the frontend container (it will show `exp://<container-ip>:8081`) or open web at `http://localhost:8081` on the host.
+
+4. To let a physical phone reach the backend when frontend runs in Docker, use the included `ngrok` service (visit `http://localhost:4040` to copy the public tunnel URL and set that as `API_URL` in `frontend/services/api.js`).
+
+### Quick troubleshooting & tips
+
+- If the backend container becomes `unhealthy` check Mongo connection and `.env` (`MONGO_URI`) and then:
+
+```bash
+docker compose logs -f backend
+# or inspect container status
+docker ps --filter name=northern-harvest-backend
+```
+
+- To see OTP codes (server prints them), follow backend logs:
+
+```bash
+docker compose logs -f backend
+```
+
+```
+
 That's it! The `.env` file is already included in the repo with working credentials.
 
 ### What Gets Started
