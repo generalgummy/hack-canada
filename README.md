@@ -170,26 +170,26 @@ hack-canada/
 
 ## 🔌 API Endpoints
 
-| Method | Path                         | Access          | Description                |
-| ------ | ---------------------------- | --------------- | -------------------------- |
-| POST   | `/api/auth/register`         | Public          | Register + send OTP        |
+| Method | Path                         | Access          | Description                            |
+| ------ | ---------------------------- | --------------- | -------------------------------------- |
+| POST   | `/api/auth/register`         | Public          | Register + send OTP                    |
 | POST   | `/api/auth/login`            | Public          | Login with phone + password, sends OTP |
-| POST   | `/api/auth/verify-otp`       | Public          | Verify 6-digit OTP code    |
-| POST   | `/api/auth/resend-otp`       | Public          | Resend OTP to phone        |
-| GET    | `/api/auth/me`               | Protected       | Auto-login check           |
-| PUT    | `/api/auth/me`               | Protected       | Update profile             |
-| PUT    | `/api/auth/upload-document`  | Protected       | Upload verification doc    |
-| GET    | `/api/listings`              | Protected       | Browse listings            |
-| GET    | `/api/listings/mine`         | Hunter/Supplier | My listings                |
-| POST   | `/api/listings`              | Hunter/Supplier | Create listing             |
-| POST   | `/api/listings/:id/interest` | Community       | Express interest           |
-| POST   | `/api/orders`                | Community       | Place order                |
-| GET    | `/api/orders/mine`           | Protected       | My orders                  |
-| PUT    | `/api/orders/:id/status`     | Hunter/Supplier | Update order status        |
-| GET    | `/api/chat`                  | Protected       | List chat rooms            |
-| GET    | `/api/chat/:roomId`          | Member only     | Message history            |
-| GET    | `/api/users/dashboard`       | Protected       | Dashboard stats            |
-| GET    | `/api/users/nearby`          | Community       | Find nearby suppliers      |
+| POST   | `/api/auth/verify-otp`       | Public          | Verify 6-digit OTP code                |
+| POST   | `/api/auth/resend-otp`       | Public          | Resend OTP to phone                    |
+| GET    | `/api/auth/me`               | Protected       | Auto-login check                       |
+| PUT    | `/api/auth/me`               | Protected       | Update profile                         |
+| PUT    | `/api/auth/upload-document`  | Protected       | Upload verification doc                |
+| GET    | `/api/listings`              | Protected       | Browse listings                        |
+| GET    | `/api/listings/mine`         | Hunter/Supplier | My listings                            |
+| POST   | `/api/listings`              | Hunter/Supplier | Create listing                         |
+| POST   | `/api/listings/:id/interest` | Community       | Express interest                       |
+| POST   | `/api/orders`                | Community       | Place order                            |
+| GET    | `/api/orders/mine`           | Protected       | My orders                              |
+| PUT    | `/api/orders/:id/status`     | Hunter/Supplier | Update order status                    |
+| GET    | `/api/chat`                  | Protected       | List chat rooms                        |
+| GET    | `/api/chat/:roomId`          | Member only     | Message history                        |
+| GET    | `/api/users/dashboard`       | Protected       | Dashboard stats                        |
+| GET    | `/api/users/nearby`          | Community       | Find nearby suppliers                  |
 
 ---
 
@@ -208,3 +208,93 @@ hack-canada/
 ## License
 
 Built for Hack Canada 🇨🇦
+
+---
+
+## 🐳 Docker Setup (Recommended for Collaborators)
+
+The easiest way to run the project — one command starts everything.
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+
+### Quick Start
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/generalgummy/hack-canada.git
+cd hack-canada
+
+# 2. Start the backend + ngrok tunnel
+docker compose up --build
+```
+
+That's it! The `.env` file is already included in the repo with working credentials.
+
+### What Gets Started
+
+| Service  | URL                     | Description                  |
+| -------- | ----------------------- | ---------------------------- |
+| Backend  | `http://localhost:5001` | Express API server           |
+| ngrok UI | `http://localhost:4040` | Shows your public tunnel URL |
+
+### Connecting the Frontend (Mobile App)
+
+1. After `docker compose up`, open **http://localhost:4040** in your browser
+2. Copy the **public URL** shown (e.g. `https://xxxx-xxx-xxx.ngrok-free.app`)
+3. Edit `frontend/services/api.js`:
+   ```js
+   const API_URL = "https://xxxx-xxx-xxx.ngrok-free.app/api";
+   ```
+4. Edit `frontend/services/socket.js`:
+   ```js
+   const SOCKET_URL = "https://xxxx-xxx-xxx.ngrok-free.app";
+   ```
+5. Run the frontend locally:
+   ```bash
+   cd frontend
+   npm install
+   npx expo start --tunnel
+   ```
+6. Scan the QR code with **Expo Go** on your phone
+
+### Using a Stable ngrok URL (Optional)
+
+Free ngrok gives a random URL every restart. To get a **fixed URL**:
+
+1. Create a free account at [ngrok.com](https://ngrok.com)
+2. Go to **Domains** → claim a free static domain
+3. Set your auth token before starting:
+   ```bash
+   export NGROK_AUTHTOKEN=your_token_here
+   docker compose up --build
+   ```
+
+### Docker Commands
+
+```bash
+# Start everything
+docker compose up --build
+
+# Start in background
+docker compose up --build -d
+
+# View backend logs (to see OTP codes)
+docker compose logs -f backend
+
+# Stop everything
+docker compose down
+
+# Full rebuild (after code changes)
+docker compose down && docker compose up --build
+```
+
+### Troubleshooting
+
+| Problem                   | Solution                                                |
+| ------------------------- | ------------------------------------------------------- |
+| Port 5001 already in use  | `lsof -ti:5001 \| xargs kill -9` then retry             |
+| ngrok "too many sessions" | Stop any local ngrok: `pkill -f ngrok`                  |
+| Can't connect from phone  | Check URL at `http://localhost:4040`, update `api.js`   |
+| OTP not showing           | Run `docker compose logs -f backend` to see OTP in logs |
