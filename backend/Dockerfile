@@ -10,7 +10,7 @@ ENV NODE_ENV=production
 
 # Install dependencies first (better layer caching)
 COPY package.json package-lock.json ./
-RUN npm ci --production
+RUN npm install --omit=dev
 
 # Copy application source
 COPY . .

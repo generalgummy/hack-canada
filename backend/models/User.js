@@ -23,8 +23,8 @@ const userSchema = new mongoose.Schema(
     },
     userType: {
       type: String,
-      required: [true, 'Please specify user type'],
       enum: ['hunter', 'community', 'supplier'],
+      default: null, // Allow null for Auth0 users until they complete profile
     },
     phone: {
       type: String,
@@ -65,6 +65,13 @@ const userSchema = new mongoose.Schema(
     lastSeen: {
       type: Date,
       default: Date.now,
+    },
+    
+    // Auth0 Integration
+    auth0Id: {
+      type: String,
+      sparse: true, // Allow null values, but enforce uniqueness where not null
+      unique: true,
     },
 
     // Hunter-specific fields

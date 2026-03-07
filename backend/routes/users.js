@@ -118,4 +118,26 @@ router.get('/:id', protect, async (req, res) => {
   }
 });
 
+// PUT /api/users/update-user-type — Update user type
+router.put('/update-user-type', protect, async (req, res) => {
+  try {
+    const { userType } = req.body;
+
+    if (!userType || !['hunter', 'community', 'supplier'].includes(userType)) {
+      return res.status(400).json({ message: 'Invalid user type' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { userType },
+      { new: true, runValidators: false }
+    );
+
+    console.log(`✅ User ${req.user._id} changed account type to ${userType}`);
+    res.json({ user });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update user type', error: error.message });
+  }
+});
+
 module.exports = router;

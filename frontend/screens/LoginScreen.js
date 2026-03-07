@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -12,26 +11,21 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import Auth0SignInButton from '../components/Auth0SignInButton';
 
 const LoginScreen = ({ navigation }) => {
-  const { login } = useAuth();
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { loginWithSocial } = useAuth();
+  const [loading, setLoading] = useState(null);
 
-  const handleLogin = async () => {
-    if (!phone || !password) {
-      Alert.alert('Error', 'Please enter phone number and password');
-      return;
-    }
+  const handleAuth0Login = async () => {
+    console.log('🔐 Login with Google');
     setLoading(true);
     try {
-      await login(phone.trim(), password);
+      await loginWithSocial('google-oauth2');
+      console.log('✅ Login successful');
     } catch (error) {
-      Alert.alert(
-        'Login Failed',
-        error.response?.data?.message || 'Invalid credentials'
-      );
+      console.error('❌ Login error:', error);
+      Alert.alert('Login Failed', error.message || 'Please try again');
     } finally {
       setLoading(false);
     }
@@ -45,58 +39,42 @@ const LoginScreen = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
+        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.logo}>🌾</Text>
           <Text style={styles.title}>Northern Harvest</Text>
           <Text style={styles.subtitle}>
-            Connecting Canada's northern communities
+            Connecting communities with fresh local food
           </Text>
         </View>
 
-        <View style={styles.form}>
-          <Text style={styles.label}>Phone Number</Text>
-          <TextInput
-            style={styles.input}
-            value={phone}
-            onChangeText={setPhone}
-            placeholder="Enter your phone number"
-            keyboardType="phone-pad"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Enter your password"
-            secureTextEntry
-          />
+        {/* Login Card */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Welcome Back</Text>
+          <Text style={styles.cardText}>Sign in with Google to continue</Text>
 
           <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleLogin}
+            style={[styles.googleButton, loading && styles.buttonDisabled]}
+            onPress={handleAuth0Login}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Sign In</Text>
+              <>
+                <Text style={styles.googleIcon}>🔍</Text>
+                <Text style={styles.googleButtonText}>Sign in with Google</Text>
+              </>
             )}
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.linkButton}
-            onPress={() => navigation.navigate('Register')}
-          >
-            <Text style={styles.linkText}>
-              Don't have an account?{' '}
-              <Text style={styles.linkBold}>Sign Up</Text>
-            </Text>
-          </TouchableOpacity>
         </View>
+
+        {/* Footer */}
+        <Text style={styles.footer}>
+          By signing in, you agree to our Terms of Service and Privacy Policy
+        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -109,9 +87,9 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 40,
+    justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
@@ -125,63 +103,63 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '800',
     color: '#1B5E20',
-    marginBottom: 4,
+    marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
     color: '#666',
+    textAlign: 'center',
   },
-  form: {
+  card: {
     backgroundColor: '#fff',
     borderRadius: 16,
     padding: 24,
-    elevation: 3,
+    marginBottom: 32,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
+    elevation: 3,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 6,
-    marginTop: 12,
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1B5E20',
+    marginBottom: 8,
+    textAlign: 'center',
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    padding: 14,
-    fontSize: 16,
-    backgroundColor: '#FAFAFA',
+  cardText: {
+    fontSize: 13,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 24,
   },
-  button: {
-    backgroundColor: '#2E7D32',
-    borderRadius: 10,
-    paddingVertical: 16,
+  googleButton: {
+    backgroundColor: '#4285F4',
+    borderRadius: 12,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 24,
   },
   buttonDisabled: {
-    opacity: 0.7,
+    opacity: 0.6,
   },
-  buttonText: {
+  googleIcon: {
+    fontSize: 18,
+    marginRight: 8,
+  },
+  googleButtonText: {
     color: '#fff',
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  linkButton: {
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  linkText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  linkBold: {
-    color: '#2E7D32',
-    fontWeight: '700',
+  footer: {
+    fontSize: 11,
+    color: '#999',
+    textAlign: 'center',
+    lineHeight: 16,
   },
 });
 

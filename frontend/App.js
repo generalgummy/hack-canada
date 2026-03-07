@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, ActivityIndicator, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, useWindowDimensions, Platform, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -13,6 +13,7 @@ import DesktopSidebar from './components/DesktopSidebar';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import OTPScreen from './screens/OTPScreen';
+import CompleteProfileScreen from './screens/CompleteProfileScreen';
 
 // Dashboard Screens
 import HunterDashboard from './screens/HunterDashboard';
@@ -20,6 +21,7 @@ import CommunityDashboard from './screens/CommunityDashboard';
 import SupplierDashboard from './screens/SupplierDashboard';
 
 // Main Screens
+import HomeScreen from './screens/HomeScreen';
 import ListingsScreen from './screens/ListingsScreen';
 import ListingDetailScreen from './screens/ListingDetailScreen';
 import CreateListingScreen from './screens/CreateListingScreen';
@@ -52,13 +54,6 @@ const TabIcon = ({ label, focused }) => {
 const MobileTabNavigator = () => {
   const { user } = useAuth();
 
-  const DashboardScreen =
-    user?.userType === 'hunter'
-      ? HunterDashboard
-      : user?.userType === 'community'
-      ? CommunityDashboard
-      : SupplierDashboard;
-
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -80,7 +75,7 @@ const MobileTabNavigator = () => {
         },
       })}
     >
-      <Tab.Screen name="Home" component={DashboardScreen} />
+      <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Listings" component={ListingsScreen} />
       <Tab.Screen name="Orders" component={OrdersScreen} />
       <Tab.Screen name="Chat" component={ChatListScreen} />
@@ -113,7 +108,7 @@ const MainTabs = ({ navigation }) => {
 // Root Navigation
 // ==========================================
 const RootNavigator = () => {
-  const { user, loading, pendingOtp } = useAuth();
+  const { user, loading, pendingOtp, needsProfileCompletion } = useAuth();
 
   if (loading) {
     return (
@@ -128,7 +123,7 @@ const RootNavigator = () => {
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {user ? (
+      {user && !needsProfileCompletion ? (
         // App Screens
         <>
           <Stack.Screen
@@ -178,6 +173,11 @@ const RootNavigator = () => {
               headerStyle: { backgroundColor: '#fff' },
             }}
           />
+        </>
+      ) : needsProfileCompletion ? (
+        // Complete Profile Screen
+        <>
+          <Stack.Screen name="CompleteProfile" component={CompleteProfileScreen} />
         </>
       ) : pendingOtp ? (
         // OTP Verification Screen
@@ -234,9 +234,23 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     backgroundColor: '#fff',
+    // Web-specific styles for proper overflow handling
+    ...Platform.select({
+      web: {
+        overflow: 'hidden',
+      },
+      default: {},
+    }),
   },
   desktopContent: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    // Web-specific styles for proper scrolling
+    ...Platform.select({
+      web: {
+        overflow: 'hidden',
+      },
+      default: {},
+    }),
   },
 });

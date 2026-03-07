@@ -35,10 +35,91 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/auth', require('./routes/auth0')); // Auth0 routes (same prefix for cleaner API)
 app.use('/api/listings', require('./routes/listings'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api', require('./routes/dev')); // Dev routes (delete users, etc.)
+
+// Auth0 Callback Page (served from backend to handle popup redirect)
+app.get('/auth-callback', (req, res) => {
+  const code = req.query.code || '';
+  const error = req.query.error || '';
+  const errorDescription = req.query.error_description || '';
+  
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Auth Callback</title>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          background: #f5f9f5;
+          margin: 0;
+        }
+        .container {
+          text-align: center;
+          padding: 20px;
+        }
+        h1 { color: #1b5e20; margin: 0 0 10px 0; }
+        p { color: #666; margin: 0; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>🌾 Northern Harvest</h1>
+        <p>Completing authentication...</p>
+      </div>
+      <script>
+        const code = '${code}';
+        const error = '${error}';
+        const errorDescription = '${errorDescription}';
+
+        if (code) {
+          console.log('✅ Auth callback received code:', code);
+          if (window.opener) {
+            window.opener.postMessage({
+              type: 'AUTH0_CODE',
+              code: code
+            }, '*');
+            console.log('✅ Sent code to parent window');
+          }
+          setTimeout(() => window.close(), 500);
+        } else if (error) {
+          console.error('❌ Auth error:', error, errorDescription);
+          if (window.opener) {
+            window.opener.postMessage({
+              type: 'AUTH0_ERROR',
+              error: error,
+              errorDescription: errorDescription
+            }, '*');
+          }
+          setTimeout(() => window.close(), 500);
+        } else {
+          console.log('❓ Auth callback page loaded but no code or error found');
+          if (window.opener) {
+            window.opener.postMessage({
+              type: 'AUTH0_URL',
+              url: window.location.href
+            }, '*');
+          }
+        }
+      </script>
+    </body>
+    </html>
+  `;
+  
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(html);
+});
 
 // Health check
 app.get('/', (req, res) => {
