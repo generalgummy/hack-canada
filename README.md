@@ -191,7 +191,7 @@ hack-canada/
 | ----------------------- | ------------------------------------------------------------------------------------ |
 | `MONGO_URI`             | MongoDB Atlas → Connect → Connection String                                          |
 | `JWT_SECRET`            | Generate: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` |
-| `CLOUDINARY_CLOUD_NAME` | Cloudinary Dashboard                                                                 |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary dashboard                                                                 |
 | `CLOUDINARY_API_KEY`    | Cloudinary Dashboard                                                                 |
 | `CLOUDINARY_API_SECRET` | Cloudinary Dashboard                                                                 |
 
