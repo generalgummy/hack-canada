@@ -101,6 +101,63 @@ Scan the QR code with Expo Go app on your phone, or press `w` for web.
 
 ---
 
+## 🌐 Web Browser Support (Desktop & Tablet)
+
+The app is **fully responsive** and works on desktop browsers, tablets, and mobile devices:
+
+- **📱 Mobile (< 768px):** Bottom tab navigation, optimized spacing and fonts
+- **📱 Tablet (768px - 1024px):** Similar to mobile with slightly larger text
+- **🖥️ Desktop (> 1024px):** Sidebar navigation with professional layout, centered content with max-width
+
+### How to Test on Web
+
+```bash
+# Start frontend in web mode
+npm start
+# or with Expo
+npx expo start
+# then press 'w' to open in browser
+```
+
+Open your browser at `http://localhost:8081` and resize to see the responsive layout in action.
+
+### Responsive Design Features
+
+The app uses a custom **`useResponsive` hook** that provides:
+
+- Automatic screen size detection (mobile, tablet, desktop)
+- Responsive spacing values
+- Responsive font sizes
+- Conditional rendering of navigation (sidebar vs bottom tabs)
+- Content max-width on desktop for readability
+
+### Extending Responsive Design to Other Screens
+
+To make other screens responsive like `HunterDashboard`:
+
+1. Import the utilities:
+   ```javascript
+   import { useResponsive } from '../hooks/useResponsive';
+   import ResponsiveContainer from '../components/ResponsiveContainer';
+   ```
+
+2. Use in your screen:
+   ```javascript
+   const YourScreen = ({ navigation }) => {
+     const { isDesktop, spacing, fontSize } = useResponsive();
+     
+     return (
+       <ResponsiveContainer>
+         <Text style={{ fontSize: fontSize.lg, marginVertical: spacing.md }}>
+           This text scales on desktop!
+         </Text>
+       </ResponsiveContainer>
+     );
+   };
+   ```
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -127,9 +184,11 @@ hack-canada/
 │       └── users.js           ← Dashboard, nearby, profiles
 │
 └── frontend/
-    ├── App.js                 ← Navigation root
+    ├── App.js                 ← Navigation root (responsive: sidebar + tabs)
     ├── context/
     │   └── AuthContext.js     ← Auth state + JWT persistence + OTP flow
+    ├── hooks/
+    │   └── useResponsive.js   ← Responsive design utilities (screen size detection)
     ├── services/
     │   ├── api.js             ← Axios + endpoint helpers
     │   └── socket.js          ← Socket.io singleton
@@ -137,7 +196,7 @@ hack-canada/
     │   ├── LoginScreen.js     ← Phone + password login
     │   ├── RegisterScreen.js  ← Multi-step registration
     │   ├── OTPScreen.js       ← 6-digit OTP verification
-    │   ├── HunterDashboard.js
+    │   ├── HunterDashboard.js ← Example responsive screen
     │   ├── CommunityDashboard.js
     │   ├── SupplierDashboard.js
     │   ├── ListingsScreen.js
@@ -153,7 +212,9 @@ hack-canada/
         ├── OrderCard.js
         ├── StatusBadge.js
         ├── ChatBubble.js
-        └── CategoryPicker.js
+        ├── CategoryPicker.js
+        ├── DesktopSidebar.js  ← Desktop navigation sidebar
+        └── ResponsiveContainer.js ← Responsive layout wrapper
 ```
 
 ---

@@ -11,9 +11,12 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { getDashboardAPI } from '../services/api';
 import StatusBadge from '../components/StatusBadge';
+import ResponsiveContainer from '../components/ResponsiveContainer';
+import { useResponsive } from '../hooks/useResponsive';
 
 const HunterDashboard = ({ navigation }) => {
   const { user } = useAuth();
+  const { isDesktop, spacing, fontSize } = useResponsive();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -51,11 +54,13 @@ const HunterDashboard = ({ navigation }) => {
     <ScrollView
       style={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2E7D32']} />}
+      showsVerticalScrollIndicator={true}
     >
-      <View style={styles.header}>
-        <Text style={styles.greeting}>Welcome back,</Text>
-        <Text style={styles.name}>{user?.name} 🏹</Text>
-      </View>
+      <ResponsiveContainer>
+        <View style={[styles.header, { marginTop: spacing.lg, paddingHorizontal: isDesktop ? 0 : spacing.md }]}>
+          <Text style={[styles.greeting, { fontSize: fontSize.lg }]}>Welcome back,</Text>
+          <Text style={[styles.name, { fontSize: fontSize.xxl, marginTop: spacing.sm }]}>{user?.name} 🏹</Text>
+        </View>
 
       {/* Stats Cards */}
       <View style={styles.statsRow}>
@@ -147,6 +152,7 @@ const HunterDashboard = ({ navigation }) => {
       )}
 
       <View style={{ height: 30 }} />
+      </ResponsiveContainer>
     </ScrollView>
   );
 };

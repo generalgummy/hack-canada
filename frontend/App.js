@@ -2,10 +2,12 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, useWindowDimensions } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { useResponsive } from './hooks/useResponsive';
+import DesktopSidebar from './components/DesktopSidebar';
 
 // Auth Screens
 import LoginScreen from './screens/LoginScreen';
@@ -45,9 +47,9 @@ const TabIcon = ({ label, focused }) => {
 };
 
 // ==========================================
-// Main Tab Navigator
+// Main Tab Navigator (Mobile Bottom Tabs)
 // ==========================================
-const MainTabs = () => {
+const MobileTabNavigator = () => {
   const { user } = useAuth();
 
   const DashboardScreen =
@@ -88,6 +90,26 @@ const MainTabs = () => {
 };
 
 // ==========================================
+// Desktop + Mobile Layout Wrapper
+// ==========================================
+const MainTabs = ({ navigation }) => {
+  const { isDesktop } = useResponsive();
+
+  if (isDesktop) {
+    return (
+      <View style={styles.desktopContainer}>
+        <DesktopSidebar state={{ index: 0 }} navigation={navigation} />
+        <View style={styles.desktopContent}>
+          <MobileTabNavigator />
+        </View>
+      </View>
+    );
+  }
+
+  return <MobileTabNavigator />;
+};
+
+// ==========================================
 // Root Navigation
 // ==========================================
 const RootNavigator = () => {
@@ -109,7 +131,13 @@ const RootNavigator = () => {
       {user ? (
         // App Screens
         <>
-          <Stack.Screen name="MainTabs" component={MainTabs} />
+          <Stack.Screen
+            name="MainTabs"
+            component={MainTabs}
+            options={({ navigation }) => ({
+              // Navigation passed to support desktop sidebar
+            })}
+          />
           <Stack.Screen
             name="ListingDetail"
             component={ListingDetailScreen}
@@ -201,5 +229,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#888',
     marginTop: 12,
+  },
+  desktopContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+  },
+  desktopContent: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
   },
 });
