@@ -45,6 +45,11 @@ app.get('/', (req, res) => {
   res.json({ message: 'Northern Harvest API is running' });
 });
 
+// Lightweight health endpoint used by container healthchecks (no auth)
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // ==========================================
 // Socket.io Authentication Middleware
 // ==========================================

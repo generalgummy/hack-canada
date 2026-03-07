@@ -156,6 +156,8 @@ router.post('/verify-otp', async (req, res) => {
   try {
     const { userId, otp } = req.body;
 
+    console.log('🔐 Verify OTP request received', { userId, otp });
+
     if (!userId || !otp) {
       return res.status(400).json({ message: 'Please provide userId and OTP' });
     }
@@ -164,6 +166,9 @@ router.post('/verify-otp', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    console.log('🔎 Found user for OTP verification:', { id: user._id.toString() });
+    console.log('🔐 Stored OTP and expiry:', { otp: user.otp, otpExpires: user.otpExpires });
 
     if (!user.otp || !user.otpExpires) {
       return res.status(400).json({ message: 'No OTP requested. Please login again.' });
@@ -174,6 +179,7 @@ router.post('/verify-otp', async (req, res) => {
     }
 
     if (user.otp !== otp) {
+      console.log('❌ Invalid OTP provided');
       return res.status(400).json({ message: 'Invalid OTP' });
     }
 
@@ -184,6 +190,7 @@ router.post('/verify-otp', async (req, res) => {
     user.lastSeen = new Date();
     await user.save({ validateBeforeSave: false });
 
+    console.log('✅ OTP verified for user:', user._id.toString());
     const token = signToken(user);
 
     const userResponse = user.toObject();
