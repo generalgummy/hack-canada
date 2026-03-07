@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 
-// ⚠️ Change this to your backend URL (same as api.js)
-const SOCKET_URL = 'https://e6ef-192-159-180-156.ngrok-free.app';
+// ⚠️ Change this to your backend URL (same as api.js but without /api)
+const SOCKET_URL = 'http://localhost:5001';
 
 let socket = null;
 

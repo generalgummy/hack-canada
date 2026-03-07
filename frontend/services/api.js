@@ -2,9 +2,9 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 // ⚠️ Change this to your backend URL
-// For tunnel mode: use the ngrok URL
 // For Expo Go on same machine: http://localhost:5001
-const API_URL = 'https://e6ef-192-159-180-156.ngrok-free.app/api';
+// For physical device: use ngrok URL (e.g. https://your-subdomain.ngrok-free.app/api)
+const API_URL = 'http://localhost:5001/api';
 
 const api = axios.create({
   baseURL: API_URL,
