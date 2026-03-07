@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     container_name: northern-harvest-backend
     ports:
-      - "5001:5001"
+      - "${BACKEND_PORT:-5001}:5001"
     env_file:
       - ./backend/.env
     restart: unless-stopped
@@ -20,38 +20,39 @@ services:
       start_period: 10s
 
   # ================================
-  # ngrok Tunnel (exposes backend to the internet)
+  # Frontend Web App (production nginx)
+  # ================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # The URL where the backend will be reachable from the browser.
+        # For local Docker: http://localhost:5001
+        # For production: https://api.yourdomain.com
+        EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL:-http://localhost:5001}
+    container_name: northern-harvest-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ================================
+  # ngrok Tunnel (optional — exposes backend to the internet)
   # ================================
   ngrok:
     image: ngrok/ngrok:latest
     container_name: northern-harvest-ngrok
     command: ["http", "backend:5001", "--log=stdout"]
     ports:
-      - "4040:4040" # ngrok web UI — visit http://localhost:4040 to see the public URL
+      - "4040:4040"
     depends_on:
       backend:
         condition: service_healthy
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN:-}
     restart: unless-stopped
-
-  # ================================
-  # Frontend Expo Dev Server (optional — can also run locally)
-  # ================================
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: northern-harvest-frontend
-    ports:
-      - "8081:8081"
-      - "19000:19000"
-      - "19001:19001"
-      - "19002:19002"
-    depends_on:
-      - backend
-    stdin_open: true
-    tty: true
-    restart: unless-stopped
     profiles:
-      - with-frontend
+      - tunnel

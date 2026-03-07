@@ -1,29 +1,38 @@
 # ================================
-# Northern Harvest - Frontend (Expo Dev Server)
+# Northern Harvest - Frontend (Production Web)
+# Multi-stage build: Build with Node, serve with nginx
 # ================================
-FROM node:20-alpine
 
-# Install git (needed by some expo packages)
+# --- Stage 1: Build the Expo web bundle ---
+FROM node:20-alpine AS builder
+
 RUN apk add --no-cache git bash
 
 WORKDIR /app
 
 # Install dependencies first (better layer caching)
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json* ./
 RUN npm ci
 
 # Copy application source
 COPY . .
 
-# Expo dev server port
-EXPOSE 8081
-# Expo debugger
-EXPOSE 19000
-EXPOSE 19001
-EXPOSE 19002
+# Backend URL injected at build time (baked into the JS bundle)
+ARG EXPO_PUBLIC_API_URL=http://localhost:5001
+ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL
 
-# Set Expo to non-interactive mode
-ENV CI=1
-ENV EXPO_NO_DOTENV=1
+# Build the production web bundle
+RUN npx expo export --platform web
 
-CMD ["npx", "expo", "start", "--tunnel"]
+# --- Stage 2: Serve with nginx ---
+FROM nginx:1.27-alpine
+
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy the built web bundle from the builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

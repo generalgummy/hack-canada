@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 
-// ⚠️ Change this to your backend URL (same as api.js but without /api)
-const SOCKET_URL = 'http://localhost:5001';
+// Backend socket URL — set via EXPO_PUBLIC_API_URL env var, defaults to localhost
+const SOCKET_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5001';
 
 let socket = null;
 

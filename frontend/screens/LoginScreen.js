@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -11,23 +12,39 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import Auth0SignInButton from '../components/Auth0SignInButton';
 
 const LoginScreen = ({ navigation }) => {
-  const { loginWithSocial } = useAuth();
-  const [loading, setLoading] = useState(null);
+  const { login, loginWithSocial } = useAuth();
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
-  const handleAuth0Login = async () => {
-    console.log('🔐 Login with Google');
+  // Normal phone + password login
+  const handleNormalLogin = async () => {
+    if (!phone || !password) {
+      Alert.alert('Error', 'Please enter your phone number and password');
+      return;
+    }
     setLoading(true);
     try {
-      await loginWithSocial('google-oauth2');
-      console.log('✅ Login successful');
+      await login(phone, password);
     } catch (error) {
-      console.error('❌ Login error:', error);
-      Alert.alert('Login Failed', error.message || 'Please try again');
+      Alert.alert('Login Failed', error.response?.data?.message || error.message || 'Please try again');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Auth0 Google login
+  const handleAuth0Login = async () => {
+    setGoogleLoading(true);
+    try {
+      await loginWithSocial('google-oauth2');
+    } catch (error) {
+      Alert.alert('Login Failed', error.message || 'Please try again');
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -53,14 +70,53 @@ const LoginScreen = ({ navigation }) => {
         {/* Login Card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Welcome Back</Text>
-          <Text style={styles.cardText}>Sign in with Google to continue</Text>
+          <Text style={styles.cardText}>Sign in to your account</Text>
+
+          {/* Normal Login Form */}
+          <TextInput
+            style={styles.input}
+            placeholder="Phone number"
+            placeholderTextColor="#999"
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="phone-pad"
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor="#999"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
           <TouchableOpacity
-            style={[styles.googleButton, loading && styles.buttonDisabled]}
-            onPress={handleAuth0Login}
-            disabled={loading}
+            style={[styles.loginButton, loading && styles.buttonDisabled]}
+            onPress={handleNormalLogin}
+            disabled={loading || googleLoading}
           >
             {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.loginButtonText}>Sign In</Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Divider */}
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>OR</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          {/* Auth0 Google Login */}
+          <TouchableOpacity
+            style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
+            onPress={handleAuth0Login}
+            disabled={loading || googleLoading}
+          >
+            {googleLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <>
@@ -68,6 +124,17 @@ const LoginScreen = ({ navigation }) => {
                 <Text style={styles.googleButtonText}>Sign in with Google</Text>
               </>
             )}
+          </TouchableOpacity>
+
+          {/* Register Link */}
+          <TouchableOpacity
+            style={styles.registerLink}
+            onPress={() => navigation.navigate('Register')}
+          >
+            <Text style={styles.registerText}>
+              Don't have an account?{' '}
+              <Text style={styles.registerTextBold}>Sign Up</Text>
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -135,6 +202,45 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 24,
   },
+  input: {
+    backgroundColor: '#F5F9F5',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: '#333',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  loginButton: {
+    backgroundColor: '#2E7D32',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  loginButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E0E0E0',
+  },
+  dividerText: {
+    marginHorizontal: 12,
+    fontSize: 13,
+    color: '#999',
+    fontWeight: '600',
+  },
   googleButton: {
     backgroundColor: '#4285F4',
     borderRadius: 12,
@@ -154,6 +260,18 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  registerLink: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  registerText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  registerTextBold: {
+    color: '#2E7D32',
+    fontWeight: '700',
   },
   footer: {
     fontSize: 11,
