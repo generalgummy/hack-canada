@@ -31,8 +31,15 @@ import EmptyState from '../components/EmptyState';
 import StatusBadge from '../components/StatusBadge';
 import { colors, F, spacing, radius, shadows } from '../theme';
 
-const CATEGORIES = ['Produce', 'Meat', 'Grain', 'Dairy', 'Bakery', 'Other'];
-const UNITS = ['kg', 'lbs', 'items', 'boxes', 'bags', 'L'];
+const CATEGORIES = [
+  { key: 'meat', label: 'Meat' },
+  { key: 'grains', label: 'Grains' },
+  { key: 'rice', label: 'Rice' },
+  { key: 'vegetables', label: 'Vegetables' },
+  { key: 'dry_rations', label: 'Dry Rations' },
+  { key: 'other', label: 'Other' },
+];
+const UNITS = ['kg', 'lbs', 'units', 'cases'];
 
 function StatTile({ value, label, color }) {
   return (
@@ -44,7 +51,7 @@ function StatTile({ value, label, color }) {
 }
 
 const DEFAULT_FORM = {
-  title: '', category: 'Produce', quantity: '', unit: 'kg',
+  title: '', category: 'meat', quantity: '', unit: 'kg',
   isDonation: true, price: '', expiryDate: new Date(),
   showDatePicker: false, photo: null, location: '',
 };
@@ -118,12 +125,20 @@ export default function HunterDashboard({ navigation }) {
       fd.append('category', form.category);
       fd.append('quantity', form.quantity || '1');
       fd.append('unit', form.unit);
-      fd.append('isDonation', String(form.isDonation));
-      if (!form.isDonation && form.price) fd.append('price', form.price);
+      fd.append('isFree', String(form.isDonation));
+      if (!form.isDonation && form.price) fd.append('pricePerUnit', form.price);
       fd.append('expirationDate', form.expiryDate.toISOString());
       if (form.location) fd.append('location', form.location);
       if (form.photo) {
-        fd.append('image', { uri: form.photo.uri, name: 'listing.jpg', type: 'image/jpeg' });
+        const uri = form.photo.uri;
+        const filename = uri.split('/').pop() || 'listing.jpg';
+        const match = /\.(\w+)$/.exec(filename);
+        const ext = match ? match[1] : 'jpg';
+        fd.append('images', {
+          uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri,
+          type: `image/${ext}`,
+          name: `listing_0.${ext}`,
+        });
       }
       await createListingAPI(fd);
       Toast.show({ type: 'success', text1: 'Harvest posted!', text2: 'Your listing is now live.' });
@@ -267,11 +282,11 @@ export default function HunterDashboard({ navigation }) {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
                 {CATEGORIES.map(c => (
                   <TouchableOpacity
-                    key={c}
-                    style={[styles.chip, form.category === c && styles.chipActive]}
-                    onPress={() => setForm(f => ({ ...f, category: c }))}
+                    key={c.key}
+                    style={[styles.chip, form.category === c.key && styles.chipActive]}
+                    onPress={() => setForm(f => ({ ...f, category: c.key }))}
                   >
-                    <Text style={[styles.chipText, form.category === c && styles.chipTextActive]}>{c}</Text>
+                    <Text style={[styles.chipText, form.category === c.key && styles.chipTextActive]}>{c.label}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
@@ -283,8 +298,12 @@ export default function HunterDashboard({ navigation }) {
                   placeholder="Amount"
                   placeholderTextColor={colors.textMuted}
                   keyboardType="numeric"
+                  inputMode="numeric"
                   value={form.quantity}
-                  onChangeText={v => setForm(f => ({ ...f, quantity: v }))}
+                  onChangeText={v => {
+                    const cleaned = v.replace(/[^0-9.]/g, '');
+                    setForm(f => ({ ...f, quantity: cleaned }));
+                  }}
                 />
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {UNITS.map(u => (
@@ -317,8 +336,12 @@ export default function HunterDashboard({ navigation }) {
                     placeholder="0.00"
                     placeholderTextColor={colors.textMuted}
                     keyboardType="decimal-pad"
+                    inputMode="decimal"
                     value={form.price}
-                    onChangeText={v => setForm(f => ({ ...f, price: v }))}
+                    onChangeText={v => {
+                      const cleaned = v.replace(/[^0-9.]/g, '');
+                      setForm(f => ({ ...f, price: cleaned }));
+                    }}
                   />
                 </>
               )}

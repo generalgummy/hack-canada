@@ -184,27 +184,34 @@ const UsersTab = () => {
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  const handleDeleteUser = (user) => {
-    Alert.alert(
-      'Delete User',
-      `Delete "${user.name}" and all their data? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await api.delete(`/admin/users/${user._id}`);
-              Alert.alert('Done', 'User deleted');
-              fetchUsers();
-            } catch (err) {
-              Alert.alert('Error', err.response?.data?.message || 'Delete failed');
-            }
-          },
-        },
-      ]
-    );
+  const handleDeleteUser = async (user) => {
+    const doDelete = async () => {
+      try {
+        await api.delete(`/admin/users/${user._id}`);
+        if (Platform.OS === 'web') alert('User deleted');
+        else Alert.alert('Done', 'User deleted');
+        fetchUsers();
+      } catch (err) {
+        const msg = err.response?.data?.message || 'Delete failed';
+        if (Platform.OS === 'web') alert(msg);
+        else Alert.alert('Error', msg);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`Delete "${user.name}" and all their data? This cannot be undone.`)) {
+        await doDelete();
+      }
+    } else {
+      Alert.alert(
+        'Delete User',
+        `Delete "${user.name}" and all their data? This cannot be undone.`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: doDelete },
+        ]
+      );
+    }
   };
 
   const handleSaveUser = async () => {
@@ -393,25 +400,32 @@ const ListingsTab = () => {
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
 
-  const handleDelete = (listing) => {
+  const handleDelete = async (listing) => {
+    const doDelete = async () => {
+      try {
+        await api.delete(`/admin/listings/${listing._id}`);
+        if (Platform.OS === 'web') alert('Listing deleted');
+        else Alert.alert('Done', 'Listing deleted');
+        fetchListings();
+      } catch (err) {
+        const msg = err.response?.data?.message || 'Delete failed';
+        if (Platform.OS === 'web') alert(msg);
+        else Alert.alert('Error', msg);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`Delete "${listing.title}"? Pending orders will be cancelled.`)) {
+        await doDelete();
+      }
+      return;
+    }
     Alert.alert(
       'Delete Listing',
       `Delete "${listing.title}"? Pending orders will be cancelled.`,
       [
         { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await api.delete(`/admin/listings/${listing._id}`);
-              Alert.alert('Done', 'Listing deleted');
-              fetchListings();
-            } catch (err) {
-              Alert.alert('Error', err.response?.data?.message || 'Delete failed');
-            }
-          },
-        },
+        { text: 'Delete', style: 'destructive', onPress: doDelete },
       ]
     );
   };
