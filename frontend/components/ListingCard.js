@@ -1,14 +1,15 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import StatusBadge from './StatusBadge';
 
 const CATEGORY_ICONS = {
-  meat: '🥩',
-  grains: '🌾',
-  rice: '🍚',
-  vegetables: '🥬',
-  dry_rations: '📦',
-  other: '🍽️',
+  meat:        'restaurant-outline',
+  grains:      'leaf-outline',
+  rice:        'nutrition-outline',
+  vegetables:  'flower-outline',
+  dry_rations: 'cube-outline',
+  other:       'restaurant-outline',
 };
 
 const ListingCard = ({ listing, onPress }) => {
@@ -23,9 +24,11 @@ const ListingCard = ({ listing, onPress }) => {
         />
       ) : (
         <View style={styles.imagePlaceholder}>
-          <Text style={styles.categoryIcon}>
-            {CATEGORY_ICONS[listing.category] || '🍽️'}
-          </Text>
+          <Ionicons
+            name={CATEGORY_ICONS[listing.category] || 'restaurant-outline'}
+            size={40}
+            color="#2A5C2A"
+          />
         </View>
       )}
 
@@ -38,7 +41,7 @@ const ListingCard = ({ listing, onPress }) => {
         </View>
 
         <Text style={styles.category}>
-          {CATEGORY_ICONS[listing.category]} {listing.category?.replace('_', ' ')}
+          {listing.category?.replace('_', ' ')}
         </Text>
 
         <View style={styles.detailRow}>
@@ -46,18 +49,20 @@ const ListingCard = ({ listing, onPress }) => {
             {quantityAvailable} {listing.unit} available
           </Text>
           <Text style={styles.price}>
-            {listing.isFree ? '🆓 Free / Donation' : `$${listing.pricePerUnit}/${listing.unit}`}
+            {listing.isFree ? 'Free / Donation' : `$${listing.pricePerUnit}/${listing.unit}`}
           </Text>
         </View>
 
         <View style={styles.bottomRow}>
-          <Text style={styles.location} numberOfLines={1}>
-            📍 {listing.location || 'Unknown'}
-          </Text>
+          <View style={styles.locationRow}>
+            <Ionicons name="location-outline" size={12} color="#7A7A7A" />
+            <Text style={styles.location} numberOfLines={1}>{listing.location || 'Unknown'}</Text>
+          </View>
           {listing.seller && (
-            <Text style={styles.seller} numberOfLines={1}>
-              {listing.seller.name} {listing.seller.isVerified ? '✓' : ''}
-            </Text>
+            <View style={styles.sellerRow}>
+              <Text style={styles.seller} numberOfLines={1}>{listing.seller.name}</Text>
+              {listing.seller.isVerified && <Ionicons name="checkmark-circle" size={12} color="#2A5C2A" style={{ marginLeft: 2 }} />}
+            </View>
           )}
         </View>
 
@@ -73,16 +78,18 @@ const ListingCard = ({ listing, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: '#FAF0DC',
+    borderRadius: 20,
     marginHorizontal: 16,
     marginVertical: 6,
     overflow: 'hidden',
     elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowColor: '#2A5C2A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(42,92,42,0.08)',
   },
   image: {
     width: '100%',
@@ -92,7 +99,7 @@ const styles = StyleSheet.create({
   imagePlaceholder: {
     width: '100%',
     height: 100,
-    backgroundColor: '#E8F5E9',
+    backgroundColor: '#D4EDDA',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -111,15 +118,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1B5E20',
+    color: '#2A5C2A',
     flex: 1,
     marginRight: 8,
+    fontFamily: 'Nunito_800ExtraBold',
   },
   category: {
     fontSize: 13,
-    color: '#666',
+    color: '#7A7A7A',
     marginBottom: 6,
     textTransform: 'capitalize',
+    fontFamily: 'Nunito_400Regular',
   },
   detailRow: {
     flexDirection: 'row',
@@ -129,32 +138,48 @@ const styles = StyleSheet.create({
   quantity: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: '#1A1A1A',
+    fontFamily: 'Nunito_400Regular',
   },
   price: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#2E7D32',
+    color: '#2A5C2A',
+    fontFamily: 'Nunito_400Regular',
   },
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: 4,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 2,
   },
   location: {
     fontSize: 12,
-    color: '#888',
+    color: '#7A7A7A',
     flex: 1,
+    fontFamily: 'Nunito_400Regular',
+  },
+  sellerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   seller: {
     fontSize: 12,
-    color: '#555',
+    color: '#3A3A3A',
     fontWeight: '500',
+    fontFamily: 'Nunito_400Regular',
   },
   expiry: {
     fontSize: 11,
-    color: '#F57C00',
+    color: '#E8834A',
     marginTop: 4,
+    fontFamily: 'Nunito_400Regular',
   },
 });
 

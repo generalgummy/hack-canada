@@ -1,14 +1,15 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 const CATEGORIES = [
-  { key: 'all', label: 'All', icon: '🍽️' },
-  { key: 'meat', label: 'Meat', icon: '🥩' },
-  { key: 'grains', label: 'Grains', icon: '🌾' },
-  { key: 'rice', label: 'Rice', icon: '🍚' },
-  { key: 'vegetables', label: 'Vegetables', icon: '🥬' },
-  { key: 'dry_rations', label: 'Dry Rations', icon: '📦' },
-  { key: 'other', label: 'Other', icon: '🥫' },
+  { key: 'all',         label: 'All',          icon: 'apps-outline' },
+  { key: 'meat',        label: 'Meat',         icon: 'restaurant-outline' },
+  { key: 'grains',      label: 'Grains',       icon: 'leaf-outline' },
+  { key: 'rice',        label: 'Rice',         icon: 'nutrition-outline' },
+  { key: 'vegetables',  label: 'Vegetables',   icon: 'flower-outline' },
+  { key: 'dry_rations', label: 'Dry Rations',  icon: 'cube-outline' },
+  { key: 'other',       label: 'Other',        icon: 'ellipsis-horizontal-outline' },
 ];
 
 const CategoryPicker = ({ selected, onSelect }) => {
@@ -27,7 +28,12 @@ const CategoryPicker = ({ selected, onSelect }) => {
           ]}
           onPress={() => onSelect(cat.key === 'all' ? null : cat.key)}
         >
-          <Text style={styles.icon}>{cat.icon}</Text>
+          <Ionicons
+            name={cat.icon}
+            size={16}
+            color={selected === cat.key ? '#1A1A1A' : 'rgba(255,255,255,0.85)'}
+            style={{ marginRight: 4 }}
+          />
           <Text
             style={[
               styles.label,
@@ -52,28 +58,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#F5F5F5',
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.3)',
     marginRight: 8,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   chipSelected: {
-    backgroundColor: '#E8F5E9',
-    borderColor: '#2E7D32',
-  },
-  icon: {
-    fontSize: 16,
-    marginRight: 4,
+    backgroundColor: '#F5C200',
+    borderColor: '#F5C200',
   },
   label: {
     fontSize: 13,
-    color: '#666',
+    color: 'rgba(255,255,255,0.8)',
     fontWeight: '500',
+    fontFamily: 'Nunito_400Regular',
   },
   labelSelected: {
-    color: '#2E7D32',
+    color: '#1A1A1A',
     fontWeight: '700',
+    fontFamily: 'Nunito_400Regular',
   },
 });
 

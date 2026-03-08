@@ -1,16 +1,16 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 const STATUS_COLORS = {
-  available: { bg: '#E8F5E9', text: '#2E7D32' },
-  reserved: { bg: '#FFF3E0', text: '#E65100' },
-  fulfilled: { bg: '#E3F2FD', text: '#1565C0' },
+  available: { bg: '#D4EDDA', text: '#2A5C2A' },
+  reserved: { bg: '#FFF3E0', text: '#E8834A' },
+  fulfilled: { bg: '#E3F2FD', text: '#4A90D9' },
   expired: { bg: '#EFEBE9', text: '#795548' },
-  cancelled: { bg: '#FFEBEE', text: '#C62828' },
-  pending: { bg: '#FFF8E1', text: '#F57F17' },
-  confirmed: { bg: '#E8F5E9', text: '#2E7D32' },
-  in_transit: { bg: '#E3F2FD', text: '#1565C0' },
-  delivered: { bg: '#E8F5E9', text: '#1B5E20' },
+  cancelled: { bg: '#FFEBEE', text: '#E05252' },
+  pending: { bg: '#FFF8E1', text: '#F5C200' },
+  confirmed: { bg: '#D4EDDA', text: '#2A5C2A' },
+  in_transit: { bg: '#E3F2FD', text: '#4A90D9' },
+  delivered: { bg: '#D4EDDA', text: '#2A5C2A' },
 };
 
 const StatusBadge = ({ status }) => {
@@ -29,12 +29,13 @@ const styles = StyleSheet.create({
   badge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 999,
   },
   text: {
     fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
+    fontFamily: 'Nunito_400Regular',
   },
 });
 

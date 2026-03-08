@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { getListingsAPI } from '../services/api';
 import ListingCard from '../components/ListingCard';
+import { Ionicons } from '@expo/vector-icons';
 import CategoryPicker from '../components/CategoryPicker';
 
 const ListingsScreen = ({ navigation }) => {
@@ -77,7 +78,7 @@ const ListingsScreen = ({ navigation }) => {
             style={styles.searchInput}
             value={locationSearch}
             onChangeText={setLocationSearch}
-            placeholder="🔍 Search by location..."
+            placeholder="Search by location..."
             onSubmitEditing={handleSearch}
             returnKeyType="search"
           />
@@ -87,7 +88,7 @@ const ListingsScreen = ({ navigation }) => {
 
       {loading && listings.length === 0 ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#2E7D32" />
+          <ActivityIndicator size="large" color="#2A5C2A" />
         </View>
       ) : (
         <FlatList
@@ -102,13 +103,13 @@ const ListingsScreen = ({ navigation }) => {
             />
           )}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2E7D32']} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2A5C2A']} />
           }
           onEndReached={onEndReached}
           onEndReachedThreshold={0.5}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Text style={styles.emptyIcon}>🍽️</Text>
+              <Ionicons name="basket-outline" size={56} color="#2A5C2A" style={{ marginBottom: 12, opacity: 0.5 }} />
               <Text style={styles.emptyText}>No listings available</Text>
               <Text style={styles.emptySubtext}>Check back soon for new harvests and supplies</Text>
             </View>
@@ -121,19 +122,18 @@ const ListingsScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F9F5' },
-  header: { paddingTop: 60, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#E0E0E0' },
-  title: { fontSize: 24, fontWeight: '800', color: '#1B5E20', paddingHorizontal: 20, marginBottom: 12 },
+  container: { flex: 1, backgroundColor: '#F5E6C8' },
+  header: { paddingTop: 60, backgroundColor: '#2A5C2A', borderBottomWidth: 0 },
+  title: { fontSize: 24, fontWeight: '800', color: '#FFFFFF', paddingHorizontal: 20, marginBottom: 12, fontFamily: 'Nunito_800ExtraBold' },
   searchRow: { paddingHorizontal: 16, marginBottom: 8 },
   searchInput: {
-    backgroundColor: '#F5F5F5', borderRadius: 10, paddingHorizontal: 16, paddingVertical: 12,
-    fontSize: 15, borderWidth: 1, borderColor: '#E0E0E0',
+    backgroundColor: '#FFFFFF', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
+    fontSize: 15, borderWidth: 1.5, borderColor: '#D0C4A8', fontFamily: 'Nunito_400Regular',
   },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   empty: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60 },
-  emptyIcon: { fontSize: 48, marginBottom: 12 },
-  emptyText: { fontSize: 18, fontWeight: '600', color: '#666' },
-  emptySubtext: { fontSize: 14, color: '#999', marginTop: 4, textAlign: 'center', paddingHorizontal: 40 },
+  emptyText: { fontSize: 18, fontWeight: '600', color: '#3A3A3A', fontFamily: 'Nunito_800ExtraBold' },
+  emptySubtext: { fontSize: 14, color: '#7A7A7A', marginTop: 4, textAlign: 'center', paddingHorizontal: 40, fontFamily: 'Nunito_400Regular' },
 });
 
 export default ListingsScreen;

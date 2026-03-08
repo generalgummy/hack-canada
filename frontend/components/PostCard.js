@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   Text,
@@ -26,24 +26,24 @@ const PostCard = ({ post, onPress }) => {
   const getTypeColor = (userType) => {
     switch (userType) {
       case 'hunter':
-        return '#8B6914';
+        return '#E8834A';
       case 'community':
-        return '#1B5E20';
+        return '#2A5C2A';
       case 'supplier':
-        return '#C62828';
+        return '#4A90D9';
       default:
-        return '#666';
+        return '#7A7A7A';
     }
   };
 
   const getTypeLabel = (userType) => {
     switch (userType) {
       case 'hunter':
-        return '🏹 Hunter';
+        return 'Hunter';
       case 'community':
-        return '🏘️ Community';
+        return 'Community';
       case 'supplier':
-        return '🏭 Supplier';
+        return 'Supplier';
       default:
         return userType;
     }
@@ -69,11 +69,11 @@ const PostCard = ({ post, onPress }) => {
             >
               {getTypeLabel(post.userType)}
             </Text>
-            <Text style={styles.dot}>•</Text>
+            <Text style={styles.dot}>{'\u2022'}</Text>
             <Text style={styles.timestamp}>{formatTime(post.timestamp)}</Text>
           </View>
           {post.location && (
-            <Text style={styles.location}>📍 {post.location}</Text>
+            <Text style={styles.location}>{post.location}</Text>
           )}
         </View>
       </View>
@@ -93,8 +93,8 @@ const PostCard = ({ post, onPress }) => {
 
       {/* Stats */}
       <View style={styles.stats}>
-        <Text style={styles.statText}>❤️ {post.likes}</Text>
-        <Text style={styles.statText}>💬 {post.comments}</Text>
+        <Text style={styles.statText}>{'\u2764'} {post.likes}</Text>
+        <Text style={styles.statText}>{post.comments} comments</Text>
       </View>
     </TouchableOpacity>
   );
@@ -102,13 +102,13 @@ const PostCard = ({ post, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: '#FAF0DC',
+    borderRadius: 20,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: '#2A5C2A',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
   },
@@ -127,7 +127,8 @@ const styles = StyleSheet.create({
   author: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1B5E20',
+    color: '#2A5C2A',
+    fontFamily: 'Nunito_400Regular',
   },
   metaRow: {
     flexDirection: 'row',
@@ -137,42 +138,47 @@ const styles = StyleSheet.create({
   userType: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Nunito_400Regular',
   },
   dot: {
     marginHorizontal: 6,
-    color: '#ccc',
+    color: '#D0C4A8',
   },
   timestamp: {
     fontSize: 12,
-    color: '#999',
+    color: '#7A7A7A',
+    fontFamily: 'Nunito_400Regular',
   },
   location: {
     fontSize: 11,
-    color: '#666',
+    color: '#7A7A7A',
     marginTop: 4,
+    fontFamily: 'Nunito_400Regular',
   },
   content: {
     fontSize: 13,
-    color: '#333',
+    color: '#3A3A3A',
     lineHeight: 18,
     marginBottom: 12,
+    fontFamily: 'Nunito_400Regular',
   },
   image: {
     width: '100%',
     height: 200,
-    borderRadius: 8,
+    borderRadius: 14,
     marginBottom: 12,
   },
   stats: {
     flexDirection: 'row',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: '#D0C4A8',
   },
   statText: {
     fontSize: 12,
-    color: '#666',
+    color: '#7A7A7A',
     marginRight: 16,
+    fontFamily: 'Nunito_400Regular',
   },
 });
 

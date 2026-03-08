@@ -14,16 +14,17 @@ import {
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { Ionicons } from '@expo/vector-icons';
 
 // ==========================================
 // Tab Constants
 // ==========================================
 const TABS = [
-  { key: 'overview', label: '📊 Overview' },
-  { key: 'users', label: '👥 Users' },
-  { key: 'listings', label: '🛍️ Listings' },
-  { key: 'orders', label: '📦 Orders' },
-  { key: 'message', label: '💬 Message' },
+  { key: 'overview', label: 'Overview' },
+  { key: 'users', label: 'Users' },
+  { key: 'listings', label: 'Listings' },
+  { key: 'orders', label: 'Orders' },
+  { key: 'message', label: 'Message' },
 ];
 
 // ==========================================
@@ -37,7 +38,7 @@ const AdminDashboard = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🛡️ Admin Dashboard</Text>
+        <Text style={styles.headerTitle}>Admin Dashboard</Text>
         <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
@@ -104,21 +105,21 @@ const OverviewTab = () => {
   return (
     <ScrollView
       contentContainerStyle={styles.scrollPad}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchStats(); }} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchStats(); }} colors={['#2A5C2A']} tintColor="#2A5C2A" />}
     >
       {/* Stat Cards */}
       <Text style={styles.sectionTitle}>Platform Overview</Text>
       <View style={styles.statGrid}>
-        <StatCard label="Total Users" value={s?.users?.total} color="#2E7D32" />
-        <StatCard label="Active Users" value={s?.users?.active} color="#388E3C" />
-        <StatCard label="Hunters" value={s?.users?.hunters} color="#FF8F00" />
-        <StatCard label="Communities" value={s?.users?.communities} color="#1565C0" />
-        <StatCard label="Suppliers" value={s?.users?.suppliers} color="#6A1B9A" />
-        <StatCard label="Total Listings" value={s?.listings?.total} color="#00838F" />
-        <StatCard label="Active Listings" value={s?.listings?.active} color="#00ACC1" />
-        <StatCard label="Total Orders" value={s?.orders?.total} color="#D84315" />
-        <StatCard label="Pending Orders" value={s?.orders?.pending} color="#EF6C00" />
-        <StatCard label="Messages" value={s?.messages?.total} color="#5C6BC0" />
+        <StatCard label="Total Users" value={s?.users?.total} color="#2A5C2A" />
+        <StatCard label="Active Users" value={s?.users?.active} color="#3D7A3D" />
+        <StatCard label="Hunters" value={s?.users?.hunters} color="#E8834A" />
+        <StatCard label="Communities" value={s?.users?.communities} color="#4A90D9" />
+        <StatCard label="Suppliers" value={s?.users?.suppliers} color="#9B59B6" />
+        <StatCard label="Total Listings" value={s?.listings?.total} color="#2A5C2A" />
+        <StatCard label="Active Listings" value={s?.listings?.active} color="#3D7A3D" />
+        <StatCard label="Total Orders" value={s?.orders?.total} color="#E05252" />
+        <StatCard label="Pending Orders" value={s?.orders?.pending} color="#F5C200" />
+        <StatCard label="Messages" value={s?.messages?.total} color="#4A90D9" />
       </View>
 
       {/* Recent Users */}
@@ -143,7 +144,7 @@ const OverviewTab = () => {
       <Text style={styles.sectionTitle}>Recent Orders</Text>
       {s?.recent?.orders?.map((o) => (
         <View key={o._id} style={styles.recentRow}>
-          <Text style={styles.recentName}>{o.buyer?.name || 'N/A'} → {o.seller?.name || 'N/A'}</Text>
+          <Text style={styles.recentName}>{o.buyer?.name || 'N/A'} {'\u2192'} {o.seller?.name || 'N/A'}</Text>
           <Text style={styles.recentMeta}>{o.status} · ${o.totalPrice ?? 0}</Text>
         </View>
       ))}
@@ -234,7 +235,7 @@ const UsersTab = () => {
       <View style={styles.searchRow}>
         <TextInput
           style={[styles.searchInput, { flex: 1 }]}
-          placeholder="Search name, email, phone…"
+          placeholder="Search name, email, phone..."
           placeholderTextColor="#999"
           value={search}
           onChangeText={(t) => { setSearch(t); setPage(1); }}
@@ -261,19 +262,19 @@ const UsersTab = () => {
           {users.map((u) => (
             <View key={u._id} style={styles.card}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.cardName}>{u.name} {u.isAdmin ? '🛡️' : ''}</Text>
+                <Text style={styles.cardName}>{u.name}{u.isAdmin ? ' [Admin]' : ''}</Text>
                 <Text style={styles.cardMeta}>{u.email}</Text>
-                <Text style={styles.cardMeta}>{u.phone} · {u.userType || 'N/A'} · {u.isActive ? '🟢 Active' : '🔴 Inactive'}</Text>
+                <Text style={styles.cardMeta}>{u.phone} · {u.userType || 'N/A'} · {u.isActive ? 'Active' : 'Inactive'}</Text>
               </View>
               <View style={styles.cardActions}>
                 <TouchableOpacity style={styles.actionBtn} onPress={() => setEditUser({ ...u })}>
-                  <Text style={styles.actionBtnText}>✏️</Text>
+                  <Ionicons name="pencil-outline" size={16} color="#4A90D9" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.actionBtn} onPress={() => setResetPwUser(u)}>
-                  <Text style={styles.actionBtnText}>🔑</Text>
+                  <Ionicons name="lock-closed-outline" size={16} color="#2A5C2A" />
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#FFEBEE' }]} onPress={() => handleDeleteUser(u)}>
-                  <Text style={styles.actionBtnText}>🗑️</Text>
+                  <Ionicons name="trash-outline" size={16} color="#E05252" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -283,11 +284,11 @@ const UsersTab = () => {
           {totalPages > 1 && (
             <View style={styles.pagination}>
               <TouchableOpacity disabled={page <= 1} onPress={() => setPage(page - 1)} style={[styles.pageBtn, page <= 1 && { opacity: 0.4 }]}>
-                <Text style={styles.pageBtnText}>← Prev</Text>
+                <Text style={styles.pageBtnText}>{'\u2190'} Prev</Text>
               </TouchableOpacity>
               <Text style={styles.pageInfo}>{page} / {totalPages}</Text>
               <TouchableOpacity disabled={page >= totalPages} onPress={() => setPage(page + 1)} style={[styles.pageBtn, page >= totalPages && { opacity: 0.4 }]}>
-                <Text style={styles.pageBtnText}>Next →</Text>
+                <Text style={styles.pageBtnText}>Next {'\u2192'}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -328,7 +329,7 @@ const UsersTab = () => {
               <TouchableOpacity style={[styles.modalBtn, { backgroundColor: '#eee' }]} onPress={() => setEditUser(null)}>
                 <Text style={{ fontWeight: '600' }}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalBtn, { backgroundColor: '#2E7D32' }]} onPress={handleSaveUser}>
+              <TouchableOpacity style={[styles.modalBtn, { backgroundColor: '#2A5C2A' }]} onPress={handleSaveUser}>
                 <Text style={{ color: '#fff', fontWeight: '600' }}>Save Changes</Text>
               </TouchableOpacity>
             </View>
@@ -354,7 +355,7 @@ const UsersTab = () => {
               <TouchableOpacity style={[styles.modalBtn, { backgroundColor: '#eee' }]} onPress={() => { setResetPwUser(null); setNewPassword(''); }}>
                 <Text style={{ fontWeight: '600' }}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalBtn, { backgroundColor: '#D84315' }]} onPress={handleResetPassword}>
+              <TouchableOpacity style={[styles.modalBtn, { backgroundColor: '#E05252' }]} onPress={handleResetPassword}>
                 <Text style={{ color: '#fff', fontWeight: '600' }}>Reset Password</Text>
               </TouchableOpacity>
             </View>
@@ -420,7 +421,7 @@ const ListingsTab = () => {
       <View style={styles.searchRow}>
         <TextInput
           style={[styles.searchInput, { flex: 1 }]}
-          placeholder="Search listings…"
+          placeholder="Search listings..."
           placeholderTextColor="#999"
           value={search}
           onChangeText={(t) => { setSearch(t); setPage(1); }}
@@ -443,7 +444,7 @@ const ListingsTab = () => {
                 </Text>
               </View>
               <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#FFEBEE' }]} onPress={() => handleDelete(l)}>
-                <Text style={styles.actionBtnText}>🗑️</Text>
+                <Ionicons name="trash-outline" size={16} color="#E05252" />
               </TouchableOpacity>
             </View>
           ))}
@@ -451,11 +452,11 @@ const ListingsTab = () => {
           {totalPages > 1 && (
             <View style={styles.pagination}>
               <TouchableOpacity disabled={page <= 1} onPress={() => setPage(page - 1)} style={[styles.pageBtn, page <= 1 && { opacity: 0.4 }]}>
-                <Text style={styles.pageBtnText}>← Prev</Text>
+                <Text style={styles.pageBtnText}>{'\u2190'} Prev</Text>
               </TouchableOpacity>
               <Text style={styles.pageInfo}>{page} / {totalPages}</Text>
               <TouchableOpacity disabled={page >= totalPages} onPress={() => setPage(page + 1)} style={[styles.pageBtn, page >= totalPages && { opacity: 0.4 }]}>
-                <Text style={styles.pageBtnText}>Next →</Text>
+                <Text style={styles.pageBtnText}>Next {'\u2192'}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -519,7 +520,7 @@ const OrdersTab = () => {
               <View style={{ flex: 1 }}>
                 <Text style={styles.cardName}>{o.listing?.title || 'Deleted Listing'}</Text>
                 <Text style={styles.cardMeta}>
-                  Buyer: {o.buyer?.name || 'N/A'} → Seller: {o.seller?.name || 'N/A'}
+                  Buyer: {o.buyer?.name || 'N/A'} {'\u2192'} Seller: {o.seller?.name || 'N/A'}
                 </Text>
                 <Text style={styles.cardMeta}>
                   {o.quantityRequested} {o.unit} · ${o.totalPrice ?? 0} · {o.status}
@@ -531,11 +532,11 @@ const OrdersTab = () => {
           {totalPages > 1 && (
             <View style={styles.pagination}>
               <TouchableOpacity disabled={page <= 1} onPress={() => setPage(page - 1)} style={[styles.pageBtn, page <= 1 && { opacity: 0.4 }]}>
-                <Text style={styles.pageBtnText}>← Prev</Text>
+                <Text style={styles.pageBtnText}>{'\u2190'} Prev</Text>
               </TouchableOpacity>
               <Text style={styles.pageInfo}>{page} / {totalPages}</Text>
               <TouchableOpacity disabled={page >= totalPages} onPress={() => setPage(page + 1)} style={[styles.pageBtn, page >= totalPages && { opacity: 0.4 }]}>
-                <Text style={styles.pageBtnText}>Next →</Text>
+                <Text style={styles.pageBtnText}>Next {'\u2192'}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -604,13 +605,13 @@ const MessageTab = () => {
       {/* Recipient search */}
       <TextInput
         style={styles.searchInput}
-        placeholder="Search for a user by name, email, or phone…"
+        placeholder="Search for a user by name, email, or phone..."
         placeholderTextColor="#999"
         value={search}
         onChangeText={(t) => { setSearch(t); setSelectedUser(null); }}
       />
 
-      {loading && <ActivityIndicator style={{ marginVertical: 8 }} color="#2E7D32" />}
+      {loading && <ActivityIndicator style={{ marginVertical: 8 }} color="#2A5C2A" />}
 
       {!selectedUser && users.map((u) => (
         <TouchableOpacity key={u._id} style={styles.userPickRow} onPress={() => { setSelectedUser(u); setSearch(u.name); setUsers([]); }}>
@@ -620,7 +621,7 @@ const MessageTab = () => {
       ))}
 
       {selectedUser && (
-        <View style={[styles.card, { backgroundColor: '#E8F5E9', marginTop: 8 }]}>
+        <View style={[styles.card, { backgroundColor: '#D4EDDA', marginTop: 8 }]}>
           <Text style={styles.cardName}>To: {selectedUser.name}</Text>
           <Text style={styles.cardMeta}>{selectedUser.email}</Text>
         </View>
@@ -629,7 +630,7 @@ const MessageTab = () => {
       {/* Message input */}
       <TextInput
         style={[styles.searchInput, { height: 120, textAlignVertical: 'top', marginTop: 16 }]}
-        placeholder="Type your message…"
+        placeholder="Type your message..."
         placeholderTextColor="#999"
         value={messageText}
         onChangeText={setMessageText}
@@ -656,13 +657,13 @@ const MessageTab = () => {
 // ==========================================
 const Loader = () => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60 }}>
-    <ActivityIndicator size="large" color="#2E7D32" />
+    <ActivityIndicator size="large" color="#2A5C2A" />
   </View>
 );
 
 const StatCard = ({ label, value, color }) => (
   <View style={[styles.statCard, { borderLeftColor: color }]}>
-    <Text style={[styles.statValue, { color }]}>{value ?? '—'}</Text>
+    <Text style={[styles.statValue, { color }]}>{value ?? '-'}</Text>
     <Text style={styles.statLabel}>{label}</Text>
   </View>
 );
@@ -673,10 +674,10 @@ const StatCard = ({ label, value, color }) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#F5E6C8',
   },
   header: {
-    backgroundColor: '#1B5E20',
+    backgroundColor: '#2A5C2A',
     paddingTop: Platform.OS === 'ios' ? 56 : 40,
     paddingBottom: 14,
     paddingHorizontal: 20,
@@ -685,25 +686,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 20,
     fontWeight: '800',
+    fontFamily: 'Nunito_800ExtraBold',
   },
   logoutBtn: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 8,
+    borderRadius: 999,
   },
   logoutText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontWeight: '600',
     fontSize: 13,
+    fontFamily: 'Nunito_400Regular',
   },
   tabBar: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FAF0DC',
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: '#D0C4A8',
     maxHeight: 48,
   },
   tabBarContent: {
@@ -718,15 +721,16 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   tabActive: {
-    borderBottomColor: '#2E7D32',
+    borderBottomColor: '#2A5C2A',
   },
   tabText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#888',
+    color: '#7A7A7A',
+    fontFamily: 'Nunito_400Regular',
   },
   tabTextActive: {
-    color: '#2E7D32',
+    color: '#2A5C2A',
   },
   content: {
     flex: 1,
@@ -738,9 +742,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#333',
+    color: '#1A1A1A',
     marginBottom: 12,
     marginTop: 8,
+    fontFamily: 'Nunito_800ExtraBold',
   },
   statGrid: {
     flexDirection: 'row',
@@ -749,31 +754,33 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   statCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: '#FAF0DC',
+    borderRadius: 20,
     padding: 16,
     minWidth: 140,
     flex: 1,
     borderLeftWidth: 4,
-    shadowColor: '#000',
+    shadowColor: '#2A5C2A',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
   statValue: {
     fontSize: 28,
     fontWeight: '800',
+    fontFamily: 'Nunito_800ExtraBold',
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
+    color: '#7A7A7A',
     marginTop: 4,
     fontWeight: '500',
+    fontFamily: 'Nunito_400Regular',
   },
   recentRow: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    backgroundColor: '#FAF0DC',
+    borderRadius: 14,
     padding: 12,
     marginBottom: 6,
     flexDirection: 'row',
@@ -783,11 +790,13 @@ const styles = StyleSheet.create({
   recentName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: '#1A1A1A',
+    fontFamily: 'Nunito_400Regular',
   },
   recentMeta: {
     fontSize: 12,
-    color: '#888',
+    color: '#7A7A7A',
+    fontFamily: 'Nunito_400Regular',
   },
   searchRow: {
     paddingHorizontal: 16,
@@ -796,60 +805,62 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   searchInput: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 14,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    color: '#333',
+    borderColor: '#D0C4A8',
+    color: '#3A3A3A',
   },
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#fff',
+    borderRadius: 999,
+    backgroundColor: '#FAF0DC',
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: '#D0C4A8',
     marginLeft: 8,
     marginTop: 8,
   },
   filterChipActive: {
-    backgroundColor: '#2E7D32',
-    borderColor: '#2E7D32',
+    backgroundColor: '#2A5C2A',
+    borderColor: '#2A5C2A',
   },
   filterChipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#666',
+    color: '#7A7A7A',
     textTransform: 'capitalize',
   },
   filterChipTextActive: {
-    color: '#fff',
+    color: '#FFFFFF',
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: '#FAF0DC',
+    borderRadius: 20,
     padding: 14,
     marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#2A5C2A',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.06,
     shadowRadius: 3,
     elevation: 1,
   },
   cardName: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#333',
+    color: '#1A1A1A',
+    fontFamily: 'Nunito_400Regular',
   },
   cardMeta: {
     fontSize: 12,
-    color: '#888',
+    color: '#7A7A7A',
     marginTop: 2,
+    fontFamily: 'Nunito_400Regular',
   },
   cardActions: {
     flexDirection: 'row',
@@ -858,8 +869,8 @@ const styles = StyleSheet.create({
   actionBtn: {
     width: 36,
     height: 36,
-    borderRadius: 8,
-    backgroundColor: '#F5F5F5',
+    borderRadius: 14,
+    backgroundColor: '#F5E6C8',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -876,17 +887,17 @@ const styles = StyleSheet.create({
   pageBtn: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: '#2E7D32',
+    borderRadius: 999,
+    backgroundColor: '#2A5C2A',
   },
   pageBtnText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontWeight: '600',
     fontSize: 13,
   },
   pageInfo: {
     fontSize: 14,
-    color: '#666',
+    color: '#7A7A7A',
     fontWeight: '600',
   },
   chipRow: {
@@ -902,8 +913,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
+    backgroundColor: '#FAF0DC',
+    borderRadius: 28,
     padding: 24,
     width: '100%',
     maxWidth: 500,
@@ -912,26 +923,29 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#1B5E20',
+    color: '#2A5C2A',
     marginBottom: 16,
+    fontFamily: 'Nunito_800ExtraBold',
   },
   inputLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
+    color: '#7A7A7A',
     marginBottom: 4,
     marginTop: 8,
+    fontFamily: 'Nunito_400Regular',
   },
   modalInput: {
-    backgroundColor: '#F5F9F5',
-    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 14,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: '#D0C4A8',
     marginBottom: 4,
-    color: '#333',
+    color: '#3A3A3A',
+    fontFamily: 'Nunito_400Regular',
   },
   modalBtns: {
     flexDirection: 'row',
@@ -942,25 +956,25 @@ const styles = StyleSheet.create({
   modalBtn: {
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 999,
   },
   userPickRow: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FAF0DC',
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 14,
     marginTop: 6,
     borderWidth: 1,
-    borderColor: '#E8F5E9',
+    borderColor: '#D4EDDA',
   },
   sendBtn: {
-    backgroundColor: '#2E7D32',
-    borderRadius: 12,
+    backgroundColor: '#2A5C2A',
+    borderRadius: 999,
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 16,
   },
   sendBtnText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
   },

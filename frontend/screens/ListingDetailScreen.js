@@ -116,7 +116,7 @@ const ListingDetailScreen = ({ route, navigation }) => {
           </ScrollView>
         ) : (
           <View style={styles.imagePlaceholder}>
-            <Text style={styles.placeholderEmoji}>🌾</Text>
+            <Text style={styles.placeholderEmoji}></Text>
           </View>
         )}
 
@@ -133,7 +133,7 @@ const ListingDetailScreen = ({ route, navigation }) => {
           {/* Price */}
           <View style={styles.priceRow}>
             <Text style={styles.price}>
-              {listing.isFree ? '🆓 Free / Donation' : `$${listing.pricePerUnit} / ${listing.unit}`}
+              {listing.isFree ? 'Free / Donation' : `$${listing.pricePerUnit} / ${listing.unit}`}
             </Text>
           </View>
 
@@ -189,10 +189,10 @@ const ListingDetailScreen = ({ route, navigation }) => {
             <View style={styles.sellerCard}>
               <Text style={styles.sectionTitle}>Seller</Text>
               <Text style={styles.sellerName}>
-                {listing.seller.name} {listing.seller.isVerified ? '✅' : ''}
+              {listing.seller.name}{listing.seller.isVerified ? ' \u2713' : ''}
               </Text>
               <Text style={styles.sellerInfo}>
-                📍 {listing.seller.location || 'Unknown'} • {listing.seller.userType}
+              {listing.seller.location || 'Unknown'} · {listing.seller.userType}
               </Text>
             </View>
           )}
@@ -205,7 +205,7 @@ const ListingDetailScreen = ({ route, navigation }) => {
               </Text>
               {listing.interestedParties.map((party) => (
                 <Text key={party._id || party} style={styles.partyName}>
-                  • {party.name || 'Community'} — {party.location || ''}
+                  {party.name || 'Community'} - {party.location || ''}
                 </Text>
               ))}
             </View>
@@ -257,7 +257,7 @@ const ListingDetailScreen = ({ route, navigation }) => {
             <Text style={styles.modalSubtitle}>{listing.title}</Text>
 
             <Text style={styles.modalLabel}>
-              Quantity ({listing.unit}) — Max: {quantityAvailable}
+              Quantity ({listing.unit}) â€” Max: {quantityAvailable}
             </Text>
             <TextInput
               style={styles.modalInput}
@@ -321,83 +321,86 @@ const ListingDetailScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F9F5' },
+  container: { flex: 1, backgroundColor: '#F5E6C8' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   heroImage: { width: Dimensions.get('window').width, height: 250, resizeMode: 'cover' },
   imagePlaceholder: {
-    height: 200, backgroundColor: '#E8F5E9', justifyContent: 'center', alignItems: 'center',
+    height: 200, backgroundColor: '#D4EDDA', justifyContent: 'center', alignItems: 'center',
   },
   placeholderEmoji: { fontSize: 64 },
   content: { padding: 20 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  title: { fontSize: 22, fontWeight: '800', color: '#1B5E20', flex: 1, marginRight: 10 },
-  category: { fontSize: 14, color: '#666', textTransform: 'capitalize', marginBottom: 12 },
+  title: { fontSize: 22, fontWeight: '800', color: '#2A5C2A', flex: 1, marginRight: 10, fontFamily: 'Nunito_800ExtraBold' },
+  category: { fontSize: 14, color: '#7A7A7A', textTransform: 'capitalize', marginBottom: 12, fontFamily: 'Nunito_400Regular' },
   priceRow: { marginBottom: 16 },
-  price: { fontSize: 20, fontWeight: '700', color: '#2E7D32' },
+  price: { fontSize: 20, fontWeight: '700', color: '#2A5C2A', fontFamily: 'Nunito_800ExtraBold' },
   infoCard: {
-    backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 16,
-    elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05, shadowRadius: 2,
+    backgroundColor: '#FAF0DC', borderRadius: 20, padding: 16, marginBottom: 16,
+    elevation: 1, shadowColor: '#2A5C2A', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06, shadowRadius: 4,
+    borderWidth: 1, borderColor: 'rgba(42,92,42,0.08)',
   },
   infoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
-  infoLabel: { fontSize: 14, color: '#888' },
-  infoValue: { fontSize: 14, fontWeight: '600', color: '#333' },
+  infoLabel: { fontSize: 14, color: '#7A7A7A', fontFamily: 'Nunito_400Regular' },
+  infoValue: { fontSize: 14, fontWeight: '600', color: '#1A1A1A', fontFamily: 'Nunito_400Regular' },
   descSection: { marginBottom: 16 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#333', marginBottom: 8 },
-  description: { fontSize: 14, color: '#555', lineHeight: 22 },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#1A1A1A', marginBottom: 8, fontFamily: 'Nunito_800ExtraBold' },
+  description: { fontSize: 14, color: '#3A3A3A', lineHeight: 22, fontFamily: 'Nunito_400Regular' },
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 16 },
-  tag: { backgroundColor: '#E8F5E9', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
-  tagText: { fontSize: 12, color: '#2E7D32', fontWeight: '600' },
+  tag: { backgroundColor: '#D4EDDA', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
+  tagText: { fontSize: 12, color: '#2A5C2A', fontWeight: '600', fontFamily: 'Nunito_400Regular' },
   sellerCard: {
-    backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 16,
-    elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05, shadowRadius: 2,
+    backgroundColor: '#FAF0DC', borderRadius: 20, padding: 16, marginBottom: 16,
+    elevation: 1, shadowColor: '#2A5C2A', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06, shadowRadius: 4,
+    borderWidth: 1, borderColor: 'rgba(42,92,42,0.08)',
   },
-  sellerName: { fontSize: 16, fontWeight: '600', color: '#333' },
-  sellerInfo: { fontSize: 13, color: '#888', marginTop: 4, textTransform: 'capitalize' },
+  sellerName: { fontSize: 16, fontWeight: '600', color: '#1A1A1A', fontFamily: 'Nunito_400Regular' },
+  sellerInfo: { fontSize: 13, color: '#7A7A7A', marginTop: 4, textTransform: 'capitalize', fontFamily: 'Nunito_400Regular' },
   interestedSection: { marginBottom: 16 },
-  partyName: { fontSize: 14, color: '#555', marginBottom: 4 },
+  partyName: { fontSize: 14, color: '#3A3A3A', marginBottom: 4 },
   actionBar: {
     flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 12, gap: 10,
-    backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#E0E0E0',
+    backgroundColor: '#FAF0DC', borderTopWidth: 1, borderTopColor: 'rgba(42,92,42,0.10)',
   },
   interestButton: {
-    flex: 1, backgroundColor: '#fff', borderRadius: 10, paddingVertical: 14,
-    alignItems: 'center', borderWidth: 1, borderColor: '#2E7D32',
+    flex: 1, backgroundColor: '#FAF0DC', borderRadius: 20, paddingVertical: 14,
+    alignItems: 'center', borderWidth: 1.5, borderColor: '#2A5C2A',
   },
-  interestButtonText: { fontSize: 15, fontWeight: '700', color: '#2E7D32' },
+  interestButtonText: { fontSize: 15, fontWeight: '700', color: '#2A5C2A' },
   orderButton: {
-    flex: 1, backgroundColor: '#2E7D32', borderRadius: 10, paddingVertical: 14, alignItems: 'center',
+    flex: 1, backgroundColor: '#F5C200', borderRadius: 999, paddingVertical: 14, alignItems: 'center',
+    borderWidth: 2, borderColor: '#1A1A1A',
   },
-  orderButtonText: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  orderButtonText: { fontSize: 15, fontWeight: '800', color: '#1A1A1A', fontFamily: 'Nunito_800ExtraBold' },
   editButton: {
-    flex: 1, backgroundColor: '#1565C0', borderRadius: 10, paddingVertical: 14, alignItems: 'center',
+    flex: 1, backgroundColor: '#4A90D9', borderRadius: 20, paddingVertical: 14, alignItems: 'center',
   },
-  editButtonText: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  editButtonText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
   modalOverlay: {
     flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    backgroundColor: '#FAF0DC', borderTopLeftRadius: 28, borderTopRightRadius: 28,
     padding: 24, paddingBottom: 40, maxHeight: '85%',
   },
-  modalTitle: { fontSize: 20, fontWeight: '800', color: '#1B5E20', marginBottom: 4 },
-  modalSubtitle: { fontSize: 14, color: '#666', marginBottom: 16 },
-  modalLabel: { fontSize: 13, fontWeight: '600', color: '#333', marginBottom: 4, marginTop: 10 },
+  modalTitle: { fontSize: 20, fontWeight: '800', color: '#2A5C2A', marginBottom: 4, fontFamily: 'Nunito_800ExtraBold' },
+  modalSubtitle: { fontSize: 14, color: '#7A7A7A', marginBottom: 16, fontFamily: 'Nunito_400Regular' },
+  modalLabel: { fontSize: 13, fontWeight: '600', color: '#3A3A3A', marginBottom: 4, marginTop: 10, fontFamily: 'Nunito_400Regular' },
   modalInput: {
-    borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 12, fontSize: 15, backgroundColor: '#FAFAFA',
+    borderWidth: 1.5, borderColor: '#D0C4A8', borderRadius: 14, padding: 12, fontSize: 15, backgroundColor: '#FFFFFF', fontFamily: 'Nunito_400Regular',
   },
-  totalPrice: { fontSize: 18, fontWeight: '700', color: '#2E7D32', marginTop: 12, textAlign: 'right' },
+  totalPrice: { fontSize: 18, fontWeight: '700', color: '#2A5C2A', marginTop: 12, textAlign: 'right' },
   modalActions: { flexDirection: 'row', gap: 10, marginTop: 20, marginBottom: 10 },
   cancelButton: {
-    flex: 1, paddingVertical: 14, alignItems: 'center', borderRadius: 10,
-    borderWidth: 1, borderColor: '#ddd', backgroundColor: '#fff',
+    flex: 1, paddingVertical: 14, alignItems: 'center', borderRadius: 20,
+    borderWidth: 1.5, borderColor: '#D0C4A8', backgroundColor: '#FFFFFF',
   },
-  cancelButtonText: { fontSize: 15, fontWeight: '600', color: '#666' },
+  cancelButtonText: { fontSize: 15, fontWeight: '600', color: '#7A7A7A' },
   confirmButton: {
-    flex: 1, paddingVertical: 14, alignItems: 'center', borderRadius: 10, backgroundColor: '#2E7D32',
+    flex: 1, paddingVertical: 14, alignItems: 'center', borderRadius: 20, backgroundColor: '#2A5C2A',
   },
-  confirmButtonText: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  confirmButtonText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
 });
 
 export default ListingDetailScreen;

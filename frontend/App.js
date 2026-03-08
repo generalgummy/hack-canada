@@ -1,9 +1,20 @@
-import React from 'react';
+﻿import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, ActivityIndicator, StyleSheet, useWindowDimensions, Platform, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useFonts } from 'expo-font';
+import {
+  Nunito_300Light,
+  Nunito_400Regular,
+  Nunito_600SemiBold,
+  Nunito_700Bold,
+  Nunito_800ExtraBold,
+  Nunito_900Black,
+} from '@expo-google-fonts/nunito';
+import Toast from 'react-native-toast-message';
+import FloatingTabBar from './components/FloatingTabBar';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useResponsive } from './hooks/useResponsive';
@@ -23,8 +34,15 @@ import HunterDashboard from './screens/HunterDashboard';
 import CommunityDashboard from './screens/CommunityDashboard';
 import SupplierDashboard from './screens/SupplierDashboard';
 
+// Role-aware home dashboard dispatcher
+const HomeDashboard = (props) => {
+  const { user } = useAuth();
+  if (user?.userType === 'community') return <CommunityDashboard {...props} />;
+  if (user?.userType === 'supplier')  return <SupplierDashboard  {...props} />;
+  return <HunterDashboard {...props} />;
+};
+
 // Main Screens
-import HomeScreen from './screens/HomeScreen';
 import ListingsScreen from './screens/ListingsScreen';
 import ListingDetailScreen from './screens/ListingDetailScreen';
 import CreateListingScreen from './screens/CreateListingScreen';
@@ -37,52 +55,25 @@ import ProfileScreen from './screens/ProfileScreen';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// ==========================================
-// Tab Icons (emoji-based for simplicity)
-// ==========================================
-const TabIcon = ({ label, focused }) => {
-  const icons = {
-    Home: focused ? '🏠' : '🏡',
-    Listings: focused ? '🛒' : '🛍️',
-    Orders: focused ? '📦' : '📋',
-    Chat: focused ? '💬' : '🗨️',
-    Profile: focused ? '👤' : '👥',
-  };
-  return <Text style={{ fontSize: 22 }}>{icons[label] || '📌'}</Text>;
-};
 
 // ==========================================
 // Main Tab Navigator (Mobile Bottom Tabs)
 // ==========================================
 const MobileTabNavigator = () => {
-  const { user } = useAuth();
-
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
+      tabBar={(props) => <FloatingTabBar {...props} />}
+      screenOptions={{
         headerShown: false,
-        tabBarIcon: ({ focused }) => <TabIcon label={route.name} focused={focused} />,
-        tabBarActiveTintColor: '#2E7D32',
-        tabBarInactiveTintColor: '#888',
-        tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopWidth: 1,
-          borderTopColor: '#E0E0E0',
-          paddingBottom: 6,
-          paddingTop: 6,
-          height: 60,
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
-        },
-      })}
+        // Make tab bar position absolute so content fills behind the floating bar
+        tabBarStyle: { position: 'absolute', backgroundColor: 'transparent', borderTopWidth: 0, elevation: 0 },
+      }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Home"     component={HomeDashboard} />
       <Tab.Screen name="Listings" component={ListingsScreen} />
-      <Tab.Screen name="Orders" component={OrdersScreen} />
-      <Tab.Screen name="Chat" component={ChatListScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Orders"   component={OrdersScreen} />
+      <Tab.Screen name="Chat"     component={ChatListScreen} />
+      <Tab.Screen name="Profile"  component={ProfileScreen} />
     </Tab.Navigator>
   );
 };
@@ -116,9 +107,9 @@ const RootNavigator = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingLogo}>🌾</Text>
+        <Text style={styles.loadingLogo}>NH</Text>
         <Text style={styles.loadingTitle}>Northern Harvest</Text>
-        <ActivityIndicator size="large" color="#2E7D32" style={{ marginTop: 20 }} />
+        <ActivityIndicator size="large" color="#2A5C2A" style={{ marginTop: 20 }} />
         <Text style={styles.loadingText}>Restoring your session...</Text>
       </View>
     );
@@ -148,8 +139,8 @@ const RootNavigator = () => {
             options={{
               headerShown: true,
               headerTitle: 'Listing',
-              headerTintColor: '#2E7D32',
-              headerStyle: { backgroundColor: '#fff' },
+              headerTintColor: '#2A5C2A',
+              headerStyle: { backgroundColor: '#FAF0DC' },
             }}
           />
           <Stack.Screen
@@ -158,8 +149,8 @@ const RootNavigator = () => {
             options={{
               headerShown: true,
               headerTitle: 'New Listing',
-              headerTintColor: '#2E7D32',
-              headerStyle: { backgroundColor: '#fff' },
+              headerTintColor: '#2A5C2A',
+              headerStyle: { backgroundColor: '#FAF0DC' },
             }}
           />
           <Stack.Screen
@@ -168,8 +159,8 @@ const RootNavigator = () => {
             options={{
               headerShown: true,
               headerTitle: 'Order',
-              headerTintColor: '#2E7D32',
-              headerStyle: { backgroundColor: '#fff' },
+              headerTintColor: '#2A5C2A',
+              headerStyle: { backgroundColor: '#FAF0DC' },
             }}
           />
           <Stack.Screen
@@ -178,8 +169,8 @@ const RootNavigator = () => {
             options={{
               headerShown: true,
               headerTitle: 'Chat',
-              headerTintColor: '#2E7D32',
-              headerStyle: { backgroundColor: '#fff' },
+              headerTintColor: '#2A5C2A',
+              headerStyle: { backgroundColor: '#FAF0DC' },
             }}
           />
         </>
@@ -209,12 +200,30 @@ const RootNavigator = () => {
 // App Entry
 // ==========================================
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Nunito_300Light,
+    Nunito_400Regular,
+    Nunito_600SemiBold,
+    Nunito_700Bold,
+    Nunito_800ExtraBold,
+    Nunito_900Black,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2A5C2A" />
+      </View>
+    );
+  }
+
   return (
     <AuthProvider>
       <NavigationContainer>
         <StatusBar style="dark" />
         <RootNavigator />
       </NavigationContainer>
+      <Toast />
     </AuthProvider>
   );
 }
@@ -224,7 +233,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5F9F5',
+    backgroundColor: '#F5E6C8',
   },
   loadingLogo: {
     fontSize: 64,
@@ -233,18 +242,19 @@ const styles = StyleSheet.create({
   loadingTitle: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#1B5E20',
+    color: '#2A5C2A',
+    fontFamily: 'Nunito_800ExtraBold',
   },
   loadingText: {
     fontSize: 14,
-    color: '#888',
+    color: '#7A7A7A',
     marginTop: 12,
+    fontFamily: 'Nunito_400Regular',
   },
   desktopContainer: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    // Web-specific styles for proper overflow handling
+    backgroundColor: '#F5E6C8',
     ...Platform.select({
       web: {
         overflow: 'hidden',
@@ -254,8 +264,7 @@ const styles = StyleSheet.create({
   },
   desktopContent: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    // Web-specific styles for proper scrolling
+    backgroundColor: '#F5E6C8',
     ...Platform.select({
       web: {
         overflow: 'hidden',

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { getChatRoomsAPI } from '../services/api';
+import { Ionicons } from '@expo/vector-icons';
 import StatusBadge from '../components/StatusBadge';
 
 const ChatListScreen = ({ navigation }) => {
@@ -100,7 +101,7 @@ const ChatListScreen = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2E7D32" />
+        <ActivityIndicator size="large" color="#2A5C2A" />
       </View>
     );
   }
@@ -116,11 +117,11 @@ const ChatListScreen = ({ navigation }) => {
         keyExtractor={(item) => item.roomId}
         renderItem={renderChatRoom}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2E7D32']} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2A5C2A']} />
         }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>💬</Text>
+            <Ionicons name="chatbubbles-outline" size={56} color="#2A5C2A" style={{ marginBottom: 8, opacity: 0.5 }} />
             <Text style={styles.emptyText}>No conversations yet</Text>
             <Text style={styles.emptySubtext}>Place or receive an order to start chatting</Text>
           </View>
@@ -132,39 +133,38 @@ const ChatListScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F9F5' },
+  container: { flex: 1, backgroundColor: '#F5E6C8' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   header: {
     paddingTop: 60, paddingHorizontal: 20, paddingBottom: 16,
-    backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#E0E0E0',
+    backgroundColor: '#2A5C2A', borderBottomWidth: 0,
   },
-  title: { fontSize: 24, fontWeight: '800', color: '#1B5E20' },
+  title: { fontSize: 24, fontWeight: '800', color: '#FFFFFF', fontFamily: 'Nunito_800ExtraBold' },
   chatRow: {
-    flexDirection: 'row', padding: 16, backgroundColor: '#fff',
-    borderBottomWidth: 1, borderBottomColor: '#F0F0F0',
+    flexDirection: 'row', padding: 16, backgroundColor: '#FAF0DC',
+    borderBottomWidth: 1, borderBottomColor: 'rgba(42,92,42,0.06)',
   },
   avatar: {
-    width: 48, height: 48, borderRadius: 24, backgroundColor: '#E8F5E9',
+    width: 48, height: 48, borderRadius: 24, backgroundColor: '#D4EDDA',
     justifyContent: 'center', alignItems: 'center', marginRight: 12,
   },
-  avatarText: { fontSize: 20, fontWeight: '700', color: '#2E7D32' },
+  avatarText: { fontSize: 20, fontWeight: '700', color: '#2A5C2A' },
   chatInfo: { flex: 1 },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  name: { fontSize: 15, fontWeight: '700', color: '#333', flex: 1 },
-  time: { fontSize: 11, color: '#999' },
-  listingTitle: { fontSize: 12, color: '#2E7D32', fontWeight: '500', marginTop: 1 },
-  lastMessage: { fontSize: 13, color: '#888', marginTop: 3 },
+  name: { fontSize: 15, fontWeight: '700', color: '#1A1A1A', flex: 1, fontFamily: 'Nunito_400Regular' },
+  time: { fontSize: 11, color: '#7A7A7A', fontFamily: 'Nunito_400Regular' },
+  listingTitle: { fontSize: 12, color: '#2A5C2A', fontWeight: '500', marginTop: 1, fontFamily: 'Nunito_400Regular' },
+  lastMessage: { fontSize: 13, color: '#7A7A7A', marginTop: 3, fontFamily: 'Nunito_400Regular' },
   bottomRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6,
   },
   unreadBadge: {
-    backgroundColor: '#2E7D32', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2,
+    backgroundColor: '#F5C200', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2,
   },
-  unreadText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+  unreadText: { color: '#1A1A1A', fontSize: 11, fontWeight: '700' },
   empty: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  emptyIcon: { fontSize: 48, marginBottom: 8 },
-  emptyText: { fontSize: 16, fontWeight: '600', color: '#666' },
-  emptySubtext: { fontSize: 13, color: '#999', marginTop: 4 },
+  emptyText: { fontSize: 16, fontWeight: '600', color: '#3A3A3A', fontFamily: 'Nunito_800ExtraBold' },
+  emptySubtext: { fontSize: 13, color: '#7A7A7A', marginTop: 4, fontFamily: 'Nunito_400Regular' },
 });
 
 export default ChatListScreen;

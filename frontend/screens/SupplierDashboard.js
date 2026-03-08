@@ -1,188 +1,285 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  RefreshControl,
-  TouchableOpacity,
-  ActivityIndicator,
+  View, Text, StyleSheet, ScrollView, FlatList, RefreshControl,
+  TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import Toast from 'react-native-toast-message';
 import { useAuth } from '../context/AuthContext';
-import { getDashboardAPI } from '../services/api';
+import { getDashboardAPI, getMyOrdersAPI, updateOrderStatusAPI } from '../services/api';
+import { useLocation } from '../hooks/useLocation';
+import LocationPill from '../components/LocationPill';
+import OfflineBanner from '../components/OfflineBanner';
+import SkeletonCard from '../components/SkeletonCard';
+import EmptyState from '../components/EmptyState';
 import StatusBadge from '../components/StatusBadge';
+import { colors, F, radius, shadows, urgency as U } from '../theme';
 
-const SupplierDashboard = ({ navigation }) => {
+const URGENCY_ORDER = { critical: 0, medium: 1, low: 2 };
+
+function UrgencyBadge({ level }) {
+  const u = U[level] || U.low;
+  return (
+    <View style={[styles.urgBadge, { backgroundColor: u.bg }]}>
+      <Text style={[styles.urgText, { color: u.text }]}>{u.label}</Text>
+    </View>
+  );
+}
+
+function StatTile({ value, label, color }) {
+  return (
+    <View style={[styles.statTile, { backgroundColor: color }]}>
+      <Text style={styles.statNum}>{value}</Text>
+      <Text style={styles.statLbl}>{label}</Text>
+    </View>
+  );
+}
+
+export default function SupplierDashboard({ navigation }) {
   const { user } = useAuth();
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const insets = useSafeAreaInsets();
+  const { locationLabel, loading: locLoading, fetchLocation, loadCached } = useLocation();
 
-  const fetchDashboard = async () => {
+  const [stats, setStats]             = useState(null);
+  const [requests, setRequests]       = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [refreshing, setRefreshing]   = useState(false);
+  const [selectedOrder, setSelected]  = useState(null);
+  const [deliveryForm, setDeliveryForm] = useState({ deliveryDate: new Date(), showPicker: false, notes: '' });
+  const [submitting, setSubmitting]   = useState(false);
+
+  useEffect(() => {
+    fetchAll();
+    loadCached();
+  }, []);
+
+  const fetchAll = async () => {
     try {
-      const res = await getDashboardAPI();
-      setStats(res.data.stats);
-    } catch (error) {
-      console.log('Dashboard error:', error.message);
+      const [dashRes, ordersRes] = await Promise.all([
+        getDashboardAPI(),
+        getMyOrdersAPI({ role: 'supplier', status: 'pending,confirmed' }),
+      ]);
+      setStats(dashRes.data.stats);
+      // Sort by urgency then date
+      const sorted = (ordersRes.data.orders ?? []).sort((a, b) => {
+        const urgDiff = (URGENCY_ORDER[a.urgency] ?? 2) - (URGENCY_ORDER[b.urgency] ?? 2);
+        if (urgDiff !== 0) return urgDiff;
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      });
+      setRequests(sorted);
+    } catch (e) {
+      console.log('Dashboard error:', e.message);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
+  const onRefresh = useCallback(() => { setRefreshing(true); fetchAll(); }, []);
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchDashboard();
-  }, []);
+  const openDelivery = (order) => {
+    setSelected(order);
+    setDeliveryForm({ deliveryDate: new Date(), showPicker: false, notes: '' });
+  };
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2E7D32" />
+  const confirmDelivery = async () => {
+    if (!selectedOrder) return;
+    setSubmitting(true);
+    try {
+      await updateOrderStatusAPI(selectedOrder._id, {
+        status: 'in_delivery',
+        deliveryDate: deliveryForm.deliveryDate.toISOString(),
+        notes: deliveryForm.notes,
+      });
+      Toast.show({ type: 'success', text1: 'Delivery scheduled!', text2: 'Community will be notified.' });
+      setSelected(null);
+      fetchAll();
+    } catch (e) {
+      Toast.show({ type: 'error', text1: 'Could not schedule delivery', text2: e.message });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const ListHeader = (
+    <View>
+      <OfflineBanner />
+      <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.greeting}>Ready to supply,</Text>
+            <Text style={styles.name}>{user?.businessName || user?.name || 'Supplier'}</Text>
+          </View>
+          <LocationPill label={locationLabel} loading={locLoading} onPress={fetchLocation} />
+        </View>
+        <View style={styles.statsRow}>
+          {loading ? (
+            <><SkeletonCard /><SkeletonCard /><SkeletonCard /></>
+          ) : (
+            <>
+              <StatTile value={stats?.pendingOrders   ?? 0} label="Pending"   color="#FFF3CD" />
+              <StatTile value={stats?.totalOrders     ?? 0} label="In Transit" color="#E3F2FD" />
+              <StatTile value={stats?.deliveredOrders ?? 0} label="Fulfilled"  color="#D4EDDA" />
+            </>
+          )}
+        </View>
       </View>
-    );
-  }
+      <Text style={[styles.sectionTitle, { paddingHorizontal: 18, marginTop: 22, marginBottom: 4 }]}>
+        Community Requests
+      </Text>
+    </View>
+  );
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2E7D32']} />}
-    >
-      <View style={styles.header}>
-        <Text style={styles.greeting}>Welcome back,</Text>
-        <Text style={styles.name}>{user?.businessName || user?.name} 🏭</Text>
-        {user?.supplyCategories?.length > 0 && (
-          <Text style={styles.categories}>
-            Categories: {user.supplyCategories.join(', ')}
-          </Text>
+    <View style={styles.root}>
+      <FlatList
+        data={requests}
+        keyExtractor={item => item._id}
+        ListHeaderComponent={ListHeader}
+        contentContainerStyle={{ paddingBottom: 110 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.greenDark]} />}
+        ListEmptyComponent={
+          !loading
+            ? <EmptyState icon="clipboard-outline" title="No pending requests" subtitle="Community requests will appear here" />
+            : null
+        }
+        renderItem={({ item }) => (
+          <View style={styles.requestCard}>
+            <View style={styles.requestHeader}>
+              <Text style={styles.requestTitle} numberOfLines={1}>
+                {item.supplyType || item.listing?.title || 'Supply Request'}
+              </Text>
+              <UrgencyBadge level={item.urgency || 'low'} />
+            </View>
+            {item.quantity ? (
+              <Text style={styles.requestSub}>Qty: {item.quantity}</Text>
+            ) : null}
+            <Text style={styles.requestSub}>
+              From: {item.buyer?.name || 'Community'} · {new Date(item.createdAt).toLocaleDateString()}
+            </Text>
+            {item.notes ? <Text style={styles.requestNotes}>{item.notes}</Text> : null}
+            <View style={styles.requestFooter}>
+              <StatusBadge status={item.status} />
+              <TouchableOpacity
+                style={styles.deliveryBtn}
+                onPress={() => openDelivery(item)}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.deliveryBtnText}>Arrange Delivery</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         )}
-      </View>
+      />
 
-      <View style={styles.statsRow}>
-        <View style={[styles.statCard, { backgroundColor: '#E8F5E9' }]}>
-          <Text style={styles.statNumber}>{stats?.activeListings || 0}</Text>
-          <Text style={styles.statLabel}>Active Supplies</Text>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: '#FFF3E0' }]}>
-          <Text style={styles.statNumber}>{stats?.pendingOrders || 0}</Text>
-          <Text style={styles.statLabel}>Pending Orders</Text>
-        </View>
-      </View>
-      <View style={styles.statsRow}>
-        <View style={[styles.statCard, { backgroundColor: '#E3F2FD' }]}>
-          <Text style={styles.statNumber}>{stats?.totalOrders || 0}</Text>
-          <Text style={styles.statLabel}>Total Orders</Text>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: '#F3E5F5' }]}>
-          <Text style={styles.statNumber}>{stats?.deliveredOrders || 0}</Text>
-          <Text style={styles.statLabel}>Delivered</Text>
-        </View>
-      </View>
+      {/* Delivery Scheduling Sheet */}
+      <Modal
+        visible={!!selectedOrder}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setSelected(null)}
+      >
+        <View style={styles.overlay}>
+          <TouchableOpacity style={styles.overlayTap} onPress={() => setSelected(null)} />
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.sheet}>
+            <View style={styles.sheetHandle} />
+            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+              <Text style={styles.sheetTitle}>Schedule Delivery</Text>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actionsRow}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('CreateListing')}
-          >
-            <Text style={styles.actionIcon}>➕</Text>
-            <Text style={styles.actionTextWhite}>Post New Supply</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.actionButtonAlt}
-            onPress={() => navigation.navigate('Orders')}
-          >
-            <Text style={styles.actionIcon}>📦</Text>
-            <Text style={styles.actionText}>View All Orders</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+              {selectedOrder && (
+                <View style={styles.confirmBox}>
+                  <Text style={styles.confirmLabel}>Order</Text>
+                  <Text style={styles.confirmValue}>
+                    {selectedOrder.supplyType || selectedOrder.listing?.title || 'Supply Request'}
+                  </Text>
+                  {selectedOrder.quantity ? (
+                    <Text style={styles.confirmSub}>Quantity: {selectedOrder.quantity}</Text>
+                  ) : null}
+                </View>
+              )}
 
-      {stats?.recentOrders?.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Orders</Text>
-          {stats.recentOrders.map((order) => (
-            <TouchableOpacity
-              key={order._id}
-              style={styles.listItem}
-              onPress={() => navigation.navigate('OrderDetail', { orderId: order._id })}
-            >
-              <View style={styles.listItemContent}>
-                <Text style={styles.listItemTitle}>{order.listing?.title || 'Order'}</Text>
-                <Text style={styles.listItemSub}>
-                  Buyer: {order.buyer?.name} • {order.buyer?.location}
-                </Text>
-              </View>
-              <StatusBadge status={order.status} />
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+              <TouchableOpacity onPress={() => setDeliveryForm(f => ({ ...f, showPicker: true }))}>
+                <Text style={styles.fieldLabel}>Delivery Date</Text>
+                <View style={[styles.input, { justifyContent: 'center' }]}>
+                  <Text style={{ fontFamily: F.regular, color: colors.textBody }}>
+                    {deliveryForm.deliveryDate.toLocaleDateString()}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              {deliveryForm.showPicker && (
+                <DateTimePicker
+                  value={deliveryForm.deliveryDate}
+                  mode="date"
+                  minimumDate={new Date()}
+                  onChange={(_, d) =>
+                    setDeliveryForm(f => ({ ...f, showPicker: false, deliveryDate: d || f.deliveryDate }))
+                  }
+                />
+              )}
 
-      {stats?.recentListings?.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Supplies</Text>
-          {stats.recentListings.map((listing) => (
-            <TouchableOpacity
-              key={listing._id}
-              style={styles.listItem}
-              onPress={() => navigation.navigate('ListingDetail', { listingId: listing._id })}
-            >
-              <View style={styles.listItemContent}>
-                <Text style={styles.listItemTitle}>{listing.title}</Text>
-                <Text style={styles.listItemSub}>
-                  {listing.quantity - (listing.quantityReserved || 0)} {listing.unit} remaining
-                </Text>
-              </View>
-              <StatusBadge status={listing.status} />
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+              <Text style={styles.fieldLabel}>Driver Notes</Text>
+              <TextInput
+                style={[styles.input, { height: 88, textAlignVertical: 'top' }]}
+                placeholder="Instructions for the driver..."
+                placeholderTextColor={colors.textMuted}
+                multiline
+                value={deliveryForm.notes}
+                onChangeText={v => setDeliveryForm(f => ({ ...f, notes: v }))}
+              />
 
-      <View style={{ height: 30 }} />
-    </ScrollView>
+              <TouchableOpacity
+                style={[styles.submitBtn, submitting && { opacity: 0.6 }]}
+                onPress={confirmDelivery}
+                disabled={submitting}
+              >
+                <Text style={styles.submitText}>{submitting ? 'Scheduling...' : 'Confirm Delivery'}</Text>
+              </TouchableOpacity>
+              <View style={{ height: 36 }} />
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </View>
+      </Modal>
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F9F5' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
-  greeting: { fontSize: 16, color: '#666' },
-  name: { fontSize: 26, fontWeight: '800', color: '#1B5E20' },
-  categories: { fontSize: 13, color: '#888', marginTop: 4, textTransform: 'capitalize' },
-  statsRow: { flexDirection: 'row', paddingHorizontal: 16, gap: 10, marginBottom: 10 },
-  statCard: { flex: 1, borderRadius: 14, padding: 18, alignItems: 'center' },
-  statNumber: { fontSize: 28, fontWeight: '800', color: '#333' },
-  statLabel: { fontSize: 12, color: '#666', marginTop: 4, fontWeight: '500' },
-  section: { paddingHorizontal: 20, marginTop: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#333', marginBottom: 12 },
-  actionsRow: { flexDirection: 'row', gap: 10 },
-  actionButton: {
-    flex: 1, backgroundColor: '#2E7D32', borderRadius: 12, paddingVertical: 16, alignItems: 'center',
-  },
-  actionButtonAlt: {
-    flex: 1, backgroundColor: '#fff', borderRadius: 12, paddingVertical: 16, alignItems: 'center',
-    borderWidth: 1, borderColor: '#2E7D32',
-  },
-  actionIcon: { fontSize: 20, marginBottom: 4 },
-  actionText: { fontSize: 13, fontWeight: '600', color: '#333' },
-  actionTextWhite: { fontSize: 13, fontWeight: '600', color: '#fff' },
-  listItem: {
-    backgroundColor: '#fff', borderRadius: 10, padding: 14, marginBottom: 8,
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05, shadowRadius: 2,
-  },
-  listItemContent: { flex: 1, marginRight: 10 },
-  listItemTitle: { fontSize: 14, fontWeight: '600', color: '#333' },
-  listItemSub: { fontSize: 12, color: '#888', marginTop: 2 },
+  root:        { flex: 1, backgroundColor: colors.bg },
+  header:      { backgroundColor: colors.blue, paddingHorizontal: 20, paddingBottom: 24, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
+  headerRow:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
+  greeting:    { fontFamily: F.regular, fontSize: 13, color: 'rgba(255,255,255,0.75)' },
+  name:        { fontFamily: F.black, fontSize: 22, color: '#fff', marginTop: 2 },
+  statsRow:    { flexDirection: 'row', gap: 10 },
+  statTile:    { flex: 1, borderRadius: radius.md, padding: 14, alignItems: 'center' },
+  statNum:     { fontFamily: F.black, fontSize: 24, color: '#1A355C' },
+  statLbl:     { fontFamily: F.semibold, fontSize: 11, color: colors.textMuted, marginTop: 2 },
+  sectionTitle:{ fontFamily: F.bold, fontSize: 16, color: colors.textHeading },
+  // Request card
+  requestCard:   { marginHorizontal: 18, marginTop: 10, backgroundColor: colors.bgCard, borderRadius: radius.md, padding: 14, ...shadows.card },
+  requestHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  requestTitle:  { fontFamily: F.bold, fontSize: 15, color: colors.textHeading, flex: 1, marginRight: 8 },
+  requestSub:    { fontFamily: F.regular, fontSize: 12, color: colors.textMuted, marginTop: 2 },
+  requestNotes:  { fontFamily: F.regular, fontSize: 12, color: colors.textBody, marginTop: 6, fontStyle: 'italic' },
+  requestFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
+  deliveryBtn:   { backgroundColor: colors.greenDark, borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 8 },
+  deliveryBtnText: { fontFamily: F.bold, fontSize: 13, color: '#fff' },
+  // Urgency badge
+  urgBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.pill },
+  urgText:  { fontFamily: F.bold, fontSize: 11 },
+  // Sheet
+  overlay:     { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.42)' },
+  overlayTap:  { flex: 1 },
+  sheet:       { backgroundColor: '#fff', borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingHorizontal: 20, paddingTop: 12, maxHeight: '80%' },
+  sheetHandle: { width: 44, height: 4, borderRadius: 2, backgroundColor: '#DDD', alignSelf: 'center', marginBottom: 16 },
+  sheetTitle:  { fontFamily: F.black, fontSize: 22, color: colors.textHeading, marginBottom: 16 },
+  confirmBox:  { backgroundColor: '#F7F2E8', borderRadius: radius.md, padding: 14, marginBottom: 16 },
+  confirmLabel:{ fontFamily: F.semibold, fontSize: 11, color: colors.textMuted, marginBottom: 4 },
+  confirmValue:{ fontFamily: F.bold, fontSize: 15, color: colors.textHeading },
+  confirmSub:  { fontFamily: F.regular, fontSize: 13, color: colors.textMuted, marginTop: 2 },
+  fieldLabel:  { fontFamily: F.semibold, fontSize: 13, color: colors.textBody, marginBottom: 6, marginTop: 6 },
+  input:       { backgroundColor: '#F7F2E8', borderRadius: radius.sm, paddingHorizontal: 14, paddingVertical: 11, fontFamily: F.regular, fontSize: 14, color: colors.textBody, marginBottom: 4, borderWidth: 1, borderColor: colors.border },
+  submitBtn:   { backgroundColor: colors.greenDark, borderRadius: radius.lg, paddingVertical: 16, alignItems: 'center', marginTop: 14 },
+  submitText:  { fontFamily: F.black, fontSize: 16, color: '#fff' },
 });
-
-export default SupplierDashboard;

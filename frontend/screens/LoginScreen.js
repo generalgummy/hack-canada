@@ -10,8 +10,13 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+
+const HEADING = 'Nunito_800ExtraBold';
+const BODY = 'Nunito_400Regular';
+const wheatImg = require('./assets/icon.png');
 
 const LoginScreen = ({ navigation }) => {
   const { login, loginWithSocial } = useAuth();
@@ -73,17 +78,17 @@ const LoginScreen = ({ navigation }) => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.logo}>🌾</Text>
-          <Text style={styles.title}>Northern Harvest</Text>
-          <Text style={styles.subtitle}>
+          <Image source={wheatImg} style={styles.logo} />
+          <Text style={[styles.title, { fontFamily: HEADING }]}>Northern Harvest</Text>
+          <Text style={[styles.subtitle, { fontFamily: BODY }]}>
             Connecting communities with fresh local food
           </Text>
         </View>
 
         {/* Login Card */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Welcome Back</Text>
-          <Text style={styles.cardText}>Sign in to your account</Text>
+          <Text style={[styles.cardTitle, { fontFamily: HEADING }]}>Welcome Back</Text>
+          <Text style={[styles.cardText, { fontFamily: BODY }]}>Sign in to your account</Text>
 
           {/* Error Message */}
           {errorMsg ? (
@@ -94,7 +99,7 @@ const LoginScreen = ({ navigation }) => {
 
           {/* Normal Login Form */}
           <TextInput
-            style={styles.input}
+            style={[styles.input, { fontFamily: BODY }]}
             placeholder="Email"
             placeholderTextColor="#999"
             value={email}
@@ -103,7 +108,7 @@ const LoginScreen = ({ navigation }) => {
             autoCapitalize="none"
           />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { fontFamily: BODY }]}
             placeholder="Password"
             placeholderTextColor="#999"
             value={password}
@@ -119,7 +124,7 @@ const LoginScreen = ({ navigation }) => {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.loginButtonText}>Sign In</Text>
+              <Text style={[styles.loginButtonText, { fontFamily: HEADING }]}>Sign In</Text>
             )}
           </TouchableOpacity>
 
@@ -140,8 +145,8 @@ const LoginScreen = ({ navigation }) => {
               <ActivityIndicator color="#fff" />
             ) : (
               <>
-                <Text style={styles.googleIcon}>🔍</Text>
-                <Text style={styles.googleButtonText}>Sign in with Google</Text>
+                <Text style={styles.googleIcon}></Text>
+                <Text style={[styles.googleButtonText, { fontFamily: BODY }]}>Sign in with Google</Text>
               </>
             )}
           </TouchableOpacity>
@@ -151,7 +156,7 @@ const LoginScreen = ({ navigation }) => {
             style={styles.registerLink}
             onPress={() => navigation.navigate('Register')}
           >
-            <Text style={styles.registerText}>
+            <Text style={[styles.registerText, { fontFamily: BODY }]}>
               Don't have an account?{' '}
               <Text style={styles.registerTextBold}>Sign Up</Text>
             </Text>
@@ -159,7 +164,7 @@ const LoginScreen = ({ navigation }) => {
         </View>
 
         {/* Footer */}
-        <Text style={styles.footer}>
+        <Text style={[styles.footer, { fontFamily: BODY }]}>
           By signing in, you agree to our Terms of Service and Privacy Policy
         </Text>
       </ScrollView>
@@ -170,7 +175,7 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F9F5',
+    backgroundColor: '#F5E6C8',
   },
   scrollContent: {
     flexGrow: 1,
@@ -183,67 +188,71 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   logo: {
-    fontSize: 64,
+    width: 80,
+    height: 80,
+    resizeMode: 'contain',
     marginBottom: 12,
   },
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#1B5E20',
+    color: '#2A5C2A',
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#7A7A7A',
     textAlign: 'center',
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
+    backgroundColor: '#FAF0DC',
+    borderRadius: 20,
     padding: 24,
     marginBottom: 32,
-    shadowColor: '#000',
+    shadowColor: '#2A5C2A',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowOpacity: 0.10,
+    shadowRadius: 12,
     elevation: 3,
+    borderWidth: 1.5,
+    borderColor: 'rgba(42, 92, 42, 0.10)',
   },
   cardTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#1B5E20',
+    fontWeight: '800',
+    color: '#1A1A1A',
     marginBottom: 8,
     textAlign: 'center',
   },
   cardText: {
     fontSize: 13,
-    color: '#666',
+    color: '#7A7A7A',
     textAlign: 'center',
     marginBottom: 24,
   },
   input: {
-    backgroundColor: '#F5F9F5',
-    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 15,
-    color: '#333',
+    color: '#3A3A3A',
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderWidth: 1.5,
+    borderColor: '#D0C4A8',
   },
   loginButton: {
-    backgroundColor: '#2E7D32',
-    borderRadius: 12,
-    paddingVertical: 14,
+    backgroundColor: '#2A5C2A',
+    borderRadius: 20,
+    paddingVertical: 16,
     alignItems: 'center',
     marginTop: 4,
   },
   loginButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '800',
   },
   divider: {
     flexDirection: 'row',
@@ -253,17 +262,17 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: '#D0C4A8',
   },
   dividerText: {
     marginHorizontal: 12,
     fontSize: 13,
-    color: '#999',
+    color: '#7A7A7A',
     fontWeight: '600',
   },
   googleButton: {
-    backgroundColor: '#4285F4',
-    borderRadius: 12,
+    backgroundColor: '#4A90D9',
+    borderRadius: 20,
     paddingVertical: 14,
     flexDirection: 'row',
     justifyContent: 'center',
@@ -277,9 +286,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   googleButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   registerLink: {
     marginTop: 20,
@@ -287,25 +296,25 @@ const styles = StyleSheet.create({
   },
   registerText: {
     fontSize: 14,
-    color: '#666',
+    color: '#7A7A7A',
   },
   registerTextBold: {
-    color: '#2E7D32',
+    color: '#2A5C2A',
     fontWeight: '700',
   },
   footer: {
     fontSize: 11,
-    color: '#999',
+    color: '#7A7A7A',
     textAlign: 'center',
     lineHeight: 16,
   },
   errorBox: {
     backgroundColor: '#FFEBEE',
-    borderRadius: 10,
+    borderRadius: 14,
     padding: 12,
     marginBottom: 16,
     borderLeftWidth: 4,
-    borderLeftColor: '#E53935',
+    borderLeftColor: '#E05252',
   },
   errorText: {
     color: '#C62828',

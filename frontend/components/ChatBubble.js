@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 const ChatBubble = ({ message, isOwn }) => {
@@ -36,10 +36,11 @@ const styles = StyleSheet.create({
   },
   senderName: {
     fontSize: 11,
-    color: '#888',
+    color: '#7A7A7A',
     marginBottom: 2,
     marginLeft: 8,
     fontWeight: '600',
+    fontFamily: 'Nunito_400Regular',
   },
   bubble: {
     paddingHorizontal: 14,
@@ -47,33 +48,37 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   ownBubble: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#2A5C2A',
     borderBottomRightRadius: 4,
   },
   otherBubble: {
-    backgroundColor: '#333',
+    backgroundColor: '#FAF0DC',
     borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(42,92,42,0.10)',
   },
   text: {
     fontSize: 15,
     lineHeight: 20,
+    fontFamily: 'Nunito_400Regular',
   },
   ownText: {
     color: '#fff',
   },
   otherText: {
-    color: '#f0f0f0',
+    color: '#1A1A1A',
   },
   time: {
     fontSize: 10,
     marginTop: 4,
     alignSelf: 'flex-end',
+    fontFamily: 'Nunito_400Regular',
   },
   ownTime: {
     color: 'rgba(255,255,255,0.7)',
   },
   otherTime: {
-    color: 'rgba(255,255,255,0.5)',
+    color: 'rgba(0,0,0,0.4)',
   },
 });
 

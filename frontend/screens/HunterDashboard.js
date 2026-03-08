@@ -3,123 +3,181 @@ import {
   View,
   Text,
   StyleSheet,
+  FlatList,
   ScrollView,
   RefreshControl,
   TouchableOpacity,
-  ActivityIndicator,
+  TextInput,
+  Switch,
+  Image,
+  Modal,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import * as ImagePicker from 'expo-image-picker';
+import * as Haptics from 'expo-haptics';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import Toast from 'react-native-toast-message';
 import { useAuth } from '../context/AuthContext';
-import { getDashboardAPI } from '../services/api';
+import { getDashboardAPI, createListingAPI } from '../services/api';
+import { useLocation } from '../hooks/useLocation';
+import LocationPill from '../components/LocationPill';
+import SkeletonCard from '../components/SkeletonCard';
+import OfflineBanner from '../components/OfflineBanner';
+import EmptyState from '../components/EmptyState';
 import StatusBadge from '../components/StatusBadge';
-import ResponsiveContainer from '../components/ResponsiveContainer';
-import { useResponsive } from '../hooks/useResponsive';
+import { colors, F, spacing, radius, shadows } from '../theme';
 
-const HunterDashboard = ({ navigation }) => {
+const CATEGORIES = ['Produce', 'Meat', 'Grain', 'Dairy', 'Bakery', 'Other'];
+const UNITS = ['kg', 'lbs', 'items', 'boxes', 'bags', 'L'];
+
+function StatTile({ value, label, color }) {
+  return (
+    <View style={[styles.statTile, { backgroundColor: color }]}>
+      <Text style={styles.statNum}>{value}</Text>
+      <Text style={styles.statLbl}>{label}</Text>
+    </View>
+  );
+}
+
+const DEFAULT_FORM = {
+  title: '', category: 'Produce', quantity: '', unit: 'kg',
+  isDonation: true, price: '', expiryDate: new Date(),
+  showDatePicker: false, photo: null, location: '',
+};
+
+export default function HunterDashboard({ navigation }) {
   const { user } = useAuth();
-  const { isDesktop, spacing, fontSize } = useResponsive();
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const insets = useSafeAreaInsets();
+  const { locationLabel, loading: locLoading, fetchLocation, loadCached } = useLocation();
+
+  const [stats, setStats]         = useState(null);
+  const [loading, setLoading]     = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [form, setForm]           = useState(DEFAULT_FORM);
+  const [submitting, setSubmitting] = useState(false);
+
+  // FAB spring animation
+  const fabScale = useSharedValue(1);
+  const fabStyle = useAnimatedStyle(() => ({ transform: [{ scale: fabScale.value }] }));
+
+  useEffect(() => {
+    fetchDashboard();
+    loadCached(); // Show cached location immediately
+  }, []);
 
   const fetchDashboard = async () => {
     try {
       const res = await getDashboardAPI();
       setStats(res.data.stats);
-    } catch (error) {
-      console.log('Dashboard error:', error.message);
+    } catch (e) {
+      console.log('Dashboard error:', e.message);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
-
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     fetchDashboard();
   }, []);
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2E7D32" />
-      </View>
-    );
-  }
+  const openSheet = async () => {
+    try { await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch (_) {}
+    setForm(f => ({ ...f, location: locationLabel || '' }));
+    setSheetOpen(true);
+  };
 
-  return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2E7D32']} />}
-      showsVerticalScrollIndicator={true}
-    >
-      <ResponsiveContainer>
-        <View style={[styles.header, { marginTop: spacing.lg, paddingHorizontal: isDesktop ? 0 : spacing.md }]}>
-          <Text style={[styles.greeting, { fontSize: fontSize.lg }]}>Welcome back,</Text>
-          <Text style={[styles.name, { fontSize: fontSize.xxl, marginTop: spacing.sm }]}>{user?.name} 🏹</Text>
-        </View>
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Toast.show({ type: 'error', text1: 'Photo permission denied' });
+      return;
+    }
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.75, allowsEditing: true, aspect: [4, 3],
+    });
+    if (!res.canceled) setForm(f => ({ ...f, photo: res.assets[0] }));
+  };
 
-      {/* Stats Cards */}
-      <View style={styles.statsRow}>
-        <View style={[styles.statCard, { backgroundColor: '#E8F5E9' }]}>
-          <Text style={styles.statNumber}>{stats?.activeListings || 0}</Text>
-          <Text style={styles.statLabel}>Active Listings</Text>
+  const submitListing = async () => {
+    if (!form.title.trim()) {
+      Toast.show({ type: 'error', text1: 'Add a title for your harvest' });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const fd = new FormData();
+      fd.append('title', form.title.trim());
+      fd.append('category', form.category);
+      fd.append('quantity', form.quantity || '1');
+      fd.append('unit', form.unit);
+      fd.append('isDonation', String(form.isDonation));
+      if (!form.isDonation && form.price) fd.append('price', form.price);
+      fd.append('expirationDate', form.expiryDate.toISOString());
+      if (form.location) fd.append('location', form.location);
+      if (form.photo) {
+        fd.append('image', { uri: form.photo.uri, name: 'listing.jpg', type: 'image/jpeg' });
+      }
+      await createListingAPI(fd);
+      Toast.show({ type: 'success', text1: 'Harvest posted!', text2: 'Your listing is now live.' });
+      setSheetOpen(false);
+      setForm(DEFAULT_FORM);
+      fetchDashboard();
+    } catch (e) {
+      Toast.show({ type: 'error', text1: 'Could not post listing', text2: e.message });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const recentListings = stats?.recentListings ?? [];
+  const recentOrders   = stats?.recentOrders   ?? [];
+
+  const ListHeader = (
+    <View>
+      <OfflineBanner />
+      <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.greeting}>Good harvest,</Text>
+            <Text style={styles.name}>{user?.name || 'Hunter'}</Text>
+          </View>
+          <LocationPill label={locationLabel} loading={locLoading} onPress={fetchLocation} />
         </View>
-        <View style={[styles.statCard, { backgroundColor: '#FFF3E0' }]}>
-          <Text style={styles.statNumber}>{stats?.pendingOrders || 0}</Text>
-          <Text style={styles.statLabel}>Pending Orders</Text>
+        <View style={styles.statsRow}>
+          {loading ? (
+            <><SkeletonCard /><SkeletonCard /><SkeletonCard /></>
+          ) : (
+            <>
+              <StatTile value={stats?.activeListings ?? 0}  label="Active"   color="#D4EDDA" />
+              <StatTile value={stats?.pendingOrders  ?? 0}  label="Pending"  color="#FFF3CD" />
+              <StatTile value={stats?.totalOrders    ?? 0}  label="Orders"   color="#E3F2FD" />
+            </>
+          )}
         </View>
       </View>
-      <View style={styles.statsRow}>
-        <View style={[styles.statCard, { backgroundColor: '#E3F2FD' }]}>
-          <Text style={styles.statNumber}>{stats?.totalOrders || 0}</Text>
-          <Text style={styles.statLabel}>Total Orders</Text>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: '#F3E5F5' }]}>
-          <Text style={styles.statNumber}>{stats?.deliveredOrders || 0}</Text>
-          <Text style={styles.statLabel}>Delivered</Text>
-        </View>
-      </View>
 
-      {/* Quick Actions */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actionsRow}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('CreateListing')}
-          >
-            <Text style={styles.actionIcon}>➕</Text>
-            <Text style={styles.actionText}>Post New Harvest</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.actionButtonAlt}
-            onPress={() => navigation.navigate('Orders')}
-          >
-            <Text style={styles.actionIcon}>📦</Text>
-            <Text style={styles.actionText}>View All Orders</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Recent Orders */}
-      {stats?.recentOrders?.length > 0 && (
+      {/* Recent orders section */}
+      {recentOrders.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Recent Orders</Text>
-          {stats.recentOrders.map((order) => (
+          {recentOrders.map(order => (
             <TouchableOpacity
               key={order._id}
-              style={styles.listItem}
+              style={styles.listCard}
               onPress={() => navigation.navigate('OrderDetail', { orderId: order._id })}
+              activeOpacity={0.82}
             >
-              <View style={styles.listItemContent}>
-                <Text style={styles.listItemTitle}>{order.listing?.title || 'Order'}</Text>
-                <Text style={styles.listItemSub}>
-                  Buyer: {order.buyer?.name} • {order.buyer?.location}
-                </Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.listTitle}>{order.listing?.title || 'Order'}</Text>
+                <Text style={styles.listSub}>Buyer: {order.buyer?.name}</Text>
               </View>
               <StatusBadge status={order.status} />
             </TouchableOpacity>
@@ -127,89 +185,233 @@ const HunterDashboard = ({ navigation }) => {
         </View>
       )}
 
-      {/* Recent Listings */}
-      {stats?.recentListings?.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Listings</Text>
-          {stats.recentListings.map((listing) => (
-            <TouchableOpacity
-              key={listing._id}
-              style={styles.listItem}
-              onPress={() => navigation.navigate('ListingDetail', { listingId: listing._id })}
-            >
-              <View style={styles.listItemContent}>
-                <Text style={styles.listItemTitle}>{listing.title}</Text>
-                <Text style={styles.listItemSub}>
-                  {listing.quantity - (listing.quantityReserved || 0)} {listing.unit} remaining
-                  {listing.expirationDate &&
-                    ` • Exp: ${new Date(listing.expirationDate).toLocaleDateString()}`}
+      {recentListings.length > 0 && (
+        <Text style={[styles.sectionTitle, { paddingHorizontal: 18, marginTop: 20 }]}>My Listings</Text>
+      )}
+    </View>
+  );
+
+  return (
+    <View style={styles.root}>
+      <FlatList
+        data={recentListings}
+        keyExtractor={item => item._id}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.listCard}
+            onPress={() => navigation.navigate('ListingDetail', { listingId: item._id })}
+            activeOpacity={0.82}
+          >
+            <View style={styles.listCardRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.listTitle}>{item.title}</Text>
+                <Text style={styles.listSub}>
+                  {(item.quantity - (item.quantityReserved || 0))} {item.unit} remaining
+                  {item.expirationDate
+                    ? ` · Exp ${new Date(item.expirationDate).toLocaleDateString()}`
+                    : ''}
                 </Text>
               </View>
-              <StatusBadge status={listing.status} />
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+              <StatusBadge status={item.status} />
+            </View>
+          </TouchableOpacity>
+        )}
+        ListHeaderComponent={ListHeader}
+        ListEmptyComponent={
+          !loading
+            ? <EmptyState icon="leaf-outline" title="No listings yet" subtitle="Tap + to post your first harvest" />
+            : null
+        }
+        contentContainerStyle={{ paddingBottom: 110 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.greenDark]} />
+        }
+      />
 
-      <View style={{ height: 30 }} />
-      </ResponsiveContainer>
-    </ScrollView>
+      {/* Floating Action Button */}
+      <Animated.View style={[styles.fabWrap, fabStyle, { bottom: insets.bottom + 86 }]}>
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={openSheet}
+          onPressIn={()  => { fabScale.value = withSpring(0.88, { stiffness: 500 }); }}
+          onPressOut={() => { fabScale.value = withSpring(1.0,  { stiffness: 300 }); }}
+          activeOpacity={1}
+        >
+          <Text style={styles.fabIcon}>+</Text>
+        </TouchableOpacity>
+      </Animated.View>
+
+      {/* Post Harvest Bottom Sheet */}
+      <Modal visible={sheetOpen} animationType="slide" transparent onRequestClose={() => setSheetOpen(false)}>
+        <View style={styles.overlay}>
+          <TouchableOpacity style={styles.overlayTap} onPress={() => setSheetOpen(false)} />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={styles.sheet}
+          >
+            <View style={styles.sheetHandle} />
+            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+              <Text style={styles.sheetTitle}>Post Harvest</Text>
+
+              <Text style={styles.fieldLabel}>Food Name *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="e.g. Fresh Tomatoes"
+                placeholderTextColor={colors.textMuted}
+                value={form.title}
+                onChangeText={v => setForm(f => ({ ...f, title: v }))}
+              />
+
+              <Text style={styles.fieldLabel}>Category</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
+                {CATEGORIES.map(c => (
+                  <TouchableOpacity
+                    key={c}
+                    style={[styles.chip, form.category === c && styles.chipActive]}
+                    onPress={() => setForm(f => ({ ...f, category: c }))}
+                  >
+                    <Text style={[styles.chipText, form.category === c && styles.chipTextActive]}>{c}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <Text style={styles.fieldLabel}>Quantity</Text>
+              <View style={styles.qtyRow}>
+                <TextInput
+                  style={[styles.input, { flex: 1, marginRight: 8, marginBottom: 0 }]}
+                  placeholder="Amount"
+                  placeholderTextColor={colors.textMuted}
+                  keyboardType="numeric"
+                  value={form.quantity}
+                  onChangeText={v => setForm(f => ({ ...f, quantity: v }))}
+                />
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {UNITS.map(u => (
+                    <TouchableOpacity
+                      key={u}
+                      style={[styles.chip, form.unit === u && styles.chipActive]}
+                      onPress={() => setForm(f => ({ ...f, unit: u }))}
+                    >
+                      <Text style={[styles.chipText, form.unit === u && styles.chipTextActive]}>{u}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
+              <View style={styles.toggleRow}>
+                <Text style={styles.fieldLabel}>Free Donation</Text>
+                <Switch
+                  value={form.isDonation}
+                  onValueChange={v => setForm(f => ({ ...f, isDonation: v }))}
+                  trackColor={{ true: colors.greenDark, false: '#ccc' }}
+                  thumbColor="#fff"
+                />
+              </View>
+
+              {!form.isDonation && (
+                <>
+                  <Text style={styles.fieldLabel}>Price (CAD $)</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="0.00"
+                    placeholderTextColor={colors.textMuted}
+                    keyboardType="decimal-pad"
+                    value={form.price}
+                    onChangeText={v => setForm(f => ({ ...f, price: v }))}
+                  />
+                </>
+              )}
+
+              <TouchableOpacity onPress={() => setForm(f => ({ ...f, showDatePicker: true }))}>
+                <Text style={styles.fieldLabel}>Expiry Date</Text>
+                <View style={[styles.input, { justifyContent: 'center' }]}>
+                  <Text style={{ fontFamily: F.regular, color: colors.textBody }}>
+                    {form.expiryDate.toLocaleDateString()}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              {form.showDatePicker && (
+                <DateTimePicker
+                  value={form.expiryDate}
+                  mode="date"
+                  minimumDate={new Date()}
+                  onChange={(_, d) =>
+                    setForm(f => ({ ...f, showDatePicker: false, expiryDate: d || f.expiryDate }))
+                  }
+                />
+              )}
+
+              <Text style={styles.fieldLabel}>Location</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Auto-filled from GPS"
+                placeholderTextColor={colors.textMuted}
+                value={form.location}
+                onChangeText={v => setForm(f => ({ ...f, location: v }))}
+              />
+
+              <Text style={styles.fieldLabel}>Photo</Text>
+              <TouchableOpacity style={styles.photoPicker} onPress={pickImage} activeOpacity={0.8}>
+                {form.photo ? (
+                  <Image source={{ uri: form.photo.uri }} style={styles.photoPreview} />
+                ) : (
+                  <Text style={{ fontFamily: F.semibold, color: colors.greenDark }}>Choose Photo</Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.submitBtn, submitting && { opacity: 0.6 }]}
+                onPress={submitListing}
+                disabled={submitting}
+              >
+                <Text style={styles.submitText}>{submitting ? 'Posting...' : 'Post Harvest'}</Text>
+              </TouchableOpacity>
+              <View style={{ height: 36 }} />
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </View>
+      </Modal>
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F9F5' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
-  greeting: { fontSize: 16, color: '#666' },
-  name: { fontSize: 26, fontWeight: '800', color: '#1B5E20' },
-  statsRow: { flexDirection: 'row', paddingHorizontal: 16, gap: 10, marginBottom: 10 },
-  statCard: {
-    flex: 1,
-    borderRadius: 14,
-    padding: 18,
-    alignItems: 'center',
-  },
-  statNumber: { fontSize: 28, fontWeight: '800', color: '#333' },
-  statLabel: { fontSize: 12, color: '#666', marginTop: 4, fontWeight: '500' },
-  section: { paddingHorizontal: 20, marginTop: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#333', marginBottom: 12 },
-  actionsRow: { flexDirection: 'row', gap: 10 },
-  actionButton: {
-    flex: 1,
-    backgroundColor: '#2E7D32',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  actionButtonAlt: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#2E7D32',
-  },
-  actionIcon: { fontSize: 20, marginBottom: 4 },
-  actionText: { fontSize: 13, fontWeight: '600', color: '#333' },
-  listItem: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-  },
-  listItemContent: { flex: 1, marginRight: 10 },
-  listItemTitle: { fontSize: 14, fontWeight: '600', color: '#333' },
-  listItemSub: { fontSize: 12, color: '#888', marginTop: 2 },
+  root:       { flex: 1, backgroundColor: colors.bg },
+  header:     { backgroundColor: colors.greenDark, paddingHorizontal: 20, paddingBottom: 24, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
+  headerRow:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 },
+  greeting:   { fontFamily: F.regular, fontSize: 13, color: 'rgba(255,255,255,0.7)' },
+  name:       { fontFamily: F.black, fontSize: 22, color: '#fff', marginTop: 2 },
+  statsRow:   { flexDirection: 'row', gap: 10 },
+  statTile:   { flex: 1, borderRadius: radius.md, padding: 14, alignItems: 'center' },
+  statNum:    { fontFamily: F.black, fontSize: 24, color: colors.greenDark },
+  statLbl:    { fontFamily: F.semibold, fontSize: 11, color: colors.textMuted, marginTop: 2 },
+  section:    { paddingHorizontal: 18, marginTop: 18 },
+  sectionTitle: { fontFamily: F.bold, fontSize: 16, color: colors.textHeading, marginBottom: 10 },
+  listCard:   { marginHorizontal: 18, marginTop: 10, backgroundColor: colors.bgCard, borderRadius: radius.md, padding: 14, ...shadows.card },
+  listCardRow:{ flexDirection: 'row', alignItems: 'center', gap: 10 },
+  listTitle:  { fontFamily: F.bold,    fontSize: 15, color: colors.textHeading },
+  listSub:    { fontFamily: F.regular, fontSize: 12, color: colors.textMuted, marginTop: 3 },
+  // FAB
+  fabWrap:  { position: 'absolute', right: 22 },
+  fab:      { width: 58, height: 58, borderRadius: 29, backgroundColor: colors.yellow, alignItems: 'center', justifyContent: 'center', ...shadows.button },
+  fabIcon:  { fontSize: 30, color: colors.greenDark, fontFamily: F.black, lineHeight: 34 },
+  // Sheet
+  overlay:     { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.42)' },
+  overlayTap:  { flex: 1 },
+  sheet:       { backgroundColor: '#fff', borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingHorizontal: 20, paddingTop: 12, maxHeight: '92%' },
+  sheetHandle: { width: 44, height: 4, borderRadius: 2, backgroundColor: '#DDD', alignSelf: 'center', marginBottom: 16 },
+  sheetTitle:  { fontFamily: F.black, fontSize: 22, color: colors.textHeading, marginBottom: 16 },
+  fieldLabel:  { fontFamily: F.semibold, fontSize: 13, color: colors.textBody, marginBottom: 6, marginTop: 6 },
+  input:       { backgroundColor: '#F7F2E8', borderRadius: radius.sm, paddingHorizontal: 14, paddingVertical: 11, fontFamily: F.regular, fontSize: 14, color: colors.textBody, marginBottom: 4, borderWidth: 1, borderColor: colors.border },
+  chip:        { paddingHorizontal: 14, paddingVertical: 7, borderRadius: radius.pill, backgroundColor: '#EDEDED', marginRight: 8 },
+  chipActive:  { backgroundColor: colors.greenDark },
+  chipText:    { fontFamily: F.semibold, fontSize: 12, color: colors.textBody },
+  chipTextActive: { color: '#fff' },
+  qtyRow:      { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  toggleRow:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: 8 },
+  photoPicker: { backgroundColor: '#F7F2E8', borderRadius: radius.md, height: 100, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, marginBottom: 8, overflow: 'hidden' },
+  photoPreview:{ width: '100%', height: '100%' },
+  submitBtn:   { backgroundColor: colors.greenDark, borderRadius: radius.lg, paddingVertical: 16, alignItems: 'center', marginTop: 14 },
+  submitText:  { fontFamily: F.black, fontSize: 16, color: '#fff' },
 });
-
-export default HunterDashboard;

@@ -1,0 +1,563 @@
+/* ============================================================
+   NORTHERN HARVEST — Design System Theme
+   Drop this file into your project and import it globally.
+   Matches the UI from the Re-designed_UI.pdf mockups.
+   ============================================================ */
+
+/* ── Google Fonts ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+/* ── CSS Variables ────────────────────────────────────────── */
+:root {
+  /* Core palette */
+  --nh-bg:           #F5E6C8;   /* warm cream — app background    */
+  --nh-bg-card:      #FAF0DC;   /* off-white  — cards & inputs    */
+  --nh-bg-card-alt:  #FFFFFF;   /* pure white — stat tiles        */
+
+  /* Brand greens */
+  --nh-green-dark:   #2A5C2A;   /* nav bar, headers, form CTAs    */
+  --nh-green-mid:    #3D7A3D;   /* hover states, active tabs      */
+  --nh-green-light:  #D4EDDA;   /* success badges, chip bg        */
+
+  /* Accents */
+  --nh-yellow:       #F5C200;   /* primary CTA — "Continue"       */
+  --nh-yellow-hover: #DBA800;
+  --nh-orange:       #E8834A;   /* secondary CTA — "Please Wait"  */
+  --nh-orange-hover: #CC6A32;
+  --nh-red:          #E05252;   /* accent bar (Hunter card)       */
+  --nh-blue:         #4A90D9;   /* accent bar (Mass Supplier)     */
+
+  /* Typography */
+  --nh-text-heading: #1A1A1A;
+  --nh-text-body:    #3A3A3A;
+  --nh-text-muted:   #7A7A7A;
+  --nh-text-on-dark: #FFFFFF;
+
+  /* Font families */
+  --font-display: 'Fredoka One', cursive;       /* bold playful headings  */
+  --font-body:    'Nunito', sans-serif;          /* clean readable body    */
+
+  /* Spacing scale */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-2xl: 48px;
+
+  /* Radius */
+  --radius-sm:  8px;
+  --radius-md:  14px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-card: 0 2px 12px rgba(42, 92, 42, 0.10);
+  --shadow-btn:  0 4px 14px rgba(245, 194, 0, 0.35);
+  --shadow-nav:  0 -2px 16px rgba(0, 0, 0, 0.08);
+
+  /* Transitions */
+  --transition: 0.2s ease;
+}
+
+/* ── Base Reset & Body ────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--nh-bg);
+  font-family: var(--font-body);
+  color: var(--nh-text-body);
+  font-size: 15px;
+  line-height: 1.5;
+  /* Dotted background pattern from the mockup */
+  background-image: radial-gradient(circle, #D4A84B33 1px, transparent 1px);
+  background-size: 20px 20px;
+  min-height: 100vh;
+}
+
+/* ── Typography ───────────────────────────────────────────── */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  color: var(--nh-text-heading);
+  line-height: 1.2;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.2rem; }
+
+p  { color: var(--nh-text-body); }
+
+.text-muted  { color: var(--nh-text-muted); font-size: 0.875rem; }
+.text-label  { font-weight: 700; font-size: 0.875rem; color: var(--nh-text-heading); }
+
+/* ── Cards ────────────────────────────────────────────────── */
+.nh-card {
+  background: var(--nh-bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-card);
+  border: 1.5px solid rgba(42, 92, 42, 0.10);
+}
+
+/* Role-select card (page 1) — coloured accent bar at top */
+.nh-role-card {
+  background: var(--nh-bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  border: 2px solid var(--nh-text-heading);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  overflow: hidden;
+  position: relative;
+}
+
+.nh-role-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--nh-red) 40%, var(--nh-blue) 40%);
+}
+
+.nh-role-card.hunter::before  { background: linear-gradient(90deg, var(--nh-red) 55%, var(--nh-blue) 55%); }
+.nh-role-card.community::before { background: linear-gradient(90deg, var(--nh-green-dark) 45%, var(--nh-yellow) 45%); }
+.nh-role-card.supplier::before  { background: linear-gradient(90deg, var(--nh-blue) 50%, var(--nh-orange) 50%); }
+
+.nh-role-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(42, 92, 42, 0.15);
+}
+
+.nh-role-card:active { transform: translateY(0); }
+
+.nh-role-card .role-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--nh-text-heading);
+}
+
+.nh-role-card .role-desc {
+  font-size: 0.8rem;
+  color: var(--nh-text-muted);
+}
+
+/* Stat tile (dashboard, page 6) */
+.nh-stat-tile {
+  background: var(--nh-bg-card-alt);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg) var(--space-md);
+  text-align: center;
+  flex: 1;
+}
+
+.nh-stat-tile .stat-value {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--nh-text-heading);
+}
+
+.nh-stat-tile .stat-label {
+  font-size: 0.8rem;
+  color: var(--nh-text-muted);
+}
+
+/* Listing card (page 7) */
+.nh-listing-card {
+  background: var(--nh-bg-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-md);
+}
+
+.nh-listing-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.nh-listing-card .listing-info {
+  padding: var(--space-sm) var(--space-md) var(--space-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.nh-listing-card .listing-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+
+.nh-listing-card .listing-meta {
+  font-size: 0.8rem;
+  color: var(--nh-text-muted);
+  margin-top: 2px;
+}
+
+/* ── Badges ───────────────────────────────────────────────── */
+.nh-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.nh-badge.available {
+  background: var(--nh-green-light);
+  color: var(--nh-green-dark);
+  border: 1.5px solid var(--nh-green-dark);
+}
+
+.nh-badge.pending {
+  background: #FFF3CD;
+  color: #856404;
+  border: 1.5px solid #F5C200;
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+
+/* Primary CTA — yellow pill (Continue, page 1) */
+.nh-btn-primary {
+  display: block;
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--nh-yellow);
+  color: var(--nh-text-heading);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  border: 2.5px solid var(--nh-text-heading);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  text-align: center;
+  box-shadow: var(--shadow-btn);
+  transition: background var(--transition), transform var(--transition);
+}
+
+.nh-btn-primary:hover  { background: var(--nh-yellow-hover); transform: translateY(-1px); }
+.nh-btn-primary:active { transform: translateY(0); }
+
+/* Green CTA — Create Account */
+.nh-btn-green {
+  display: block;
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--nh-green-dark);
+  color: var(--nh-text-on-dark);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  text-align: center;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.nh-btn-green:hover  { background: var(--nh-green-mid); transform: translateY(-1px); }
+.nh-btn-green:active { transform: translateY(0); }
+
+/* Orange / loading state */
+.nh-btn-orange {
+  display: block;
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--nh-orange);
+  color: var(--nh-text-on-dark);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: not-allowed;
+  text-align: center;
+}
+
+/* ── Inputs & Form Fields ─────────────────────────────────── */
+.nh-input-group {
+  margin-bottom: var(--space-md);
+}
+
+.nh-input-group label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.875rem;
+  margin-bottom: var(--space-xs);
+  color: var(--nh-text-heading);
+}
+
+.nh-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--nh-bg-card-alt);
+  border: 1.5px solid #D0C4A8;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--nh-text-body);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+}
+
+.nh-input:focus {
+  border-color: var(--nh-green-dark);
+  box-shadow: 0 0 0 3px rgba(42, 92, 42, 0.12);
+}
+
+.nh-input::placeholder { color: var(--nh-text-muted); }
+
+/* Underline-only style (Mass Supplier form, page 4) */
+.nh-input.underline {
+  border: none;
+  border-bottom: 1.5px solid #D0C4A8;
+  border-radius: 0;
+  padding-left: 0;
+  background: transparent;
+}
+
+.nh-input.underline:focus {
+  border-bottom-color: var(--nh-green-dark);
+  box-shadow: none;
+}
+
+/* Upload zone (dashed border, page 2/3) */
+.nh-upload-zone {
+  border: 2px dashed #C4A96E;
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  text-align: center;
+  cursor: pointer;
+  background: var(--nh-bg);
+  transition: background var(--transition);
+}
+
+.nh-upload-zone:hover { background: #EFD9A8; }
+
+.nh-upload-zone .upload-hint {
+  font-size: 0.78rem;
+  color: var(--nh-text-muted);
+  margin-top: var(--space-sm);
+}
+
+/* ── Filter/Chip Tabs (Listings page) ────────────────────── */
+.nh-filter-bar {
+  display: flex;
+  gap: var(--space-sm);
+  overflow-x: auto;
+  padding-bottom: var(--space-xs);
+  scrollbar-width: none;
+}
+.nh-filter-bar::-webkit-scrollbar { display: none; }
+
+.nh-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid #C8B88A;
+  background: var(--nh-bg-card);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.nh-chip.active,
+.nh-chip:hover {
+  background: var(--nh-green-dark);
+  color: var(--nh-text-on-dark);
+  border-color: var(--nh-green-dark);
+}
+
+/* ── Organisation Type Pills (Community form) ─────────────── */
+.nh-org-pills {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.nh-org-pill {
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid #C8B88A;
+  background: var(--nh-bg-card);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.nh-org-pill.active {
+  background: var(--nh-green-dark);
+  color: white;
+  border-color: var(--nh-green-dark);
+}
+
+/* ── Section Headers (Registration grouped cards) ─────────── */
+.nh-section-header {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--nh-text-heading);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* ── Bottom Navigation Bar ────────────────────────────────── */
+.nh-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--nh-green-dark);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: var(--shadow-nav);
+  z-index: 100;
+}
+
+.nh-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: rgba(255,255,255,0.65);
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--transition);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.nh-nav-item svg, .nh-nav-item .nav-icon {
+  font-size: 1.3rem;
+}
+
+.nh-nav-item.active { color: var(--nh-yellow); }
+.nh-nav-item:hover  { color: #FFFFFF; }
+
+/* ── Top App Bar ──────────────────────────────────────────── */
+.nh-app-bar {
+  background: var(--nh-green-dark);
+  color: var(--nh-text-on-dark);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  position: relative;
+}
+
+.nh-app-bar .back-btn {
+  position: absolute;
+  left: var(--space-md);
+  color: white;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+/* ── Page Screen Wrapper ──────────────────────────────────── */
+.nh-screen {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md);
+  padding-bottom: 80px; /* account for bottom nav */
+  min-height: 100vh;
+}
+
+/* ── Welcome / Splash Screen ──────────────────────────────── */
+.nh-splash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  gap: var(--space-lg);
+}
+
+.nh-splash .app-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--nh-green-dark);
+}
+
+/* Spinner matching the mockup dots */
+.nh-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(42, 92, 42, 0.2);
+  border-top-color: var(--nh-green-dark);
+  border-radius: 50%;
+  animation: nh-spin 0.8s linear infinite;
+}
+
+@keyframes nh-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Dashboard Welcome Header ─────────────────────────────── */
+.nh-welcome-header .greeting   { font-size: 0.9rem; color: var(--nh-text-muted); }
+.nh-welcome-header .user-name  { font-family: var(--font-display); font-size: 1.5rem; }
+.nh-welcome-header .user-role  { font-size: 0.8rem; color: var(--nh-text-muted); }
+
+/* ── Stat Grid (2x2 dashboard) ────────────────────────────── */
+.nh-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+  margin: var(--space-lg) 0;
+}
+
+/* ── Search Bar ───────────────────────────────────────────── */
+.nh-search {
+  position: relative;
+  margin-bottom: var(--space-md);
+}
+
+.nh-search input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  background: var(--nh-bg-card);
+  border: 1.5px solid #D0C4A8;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.nh-search .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--nh-text-muted);
+}
+
+/* ── Utilities ────────────────────────────────────────────── */
+.flex          { display: flex; }
+.flex-col      { flex-direction: column; }
+.items-center  { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-sm        { gap: var(--space-sm); }
+.gap-md        { gap: var(--space-md); }
+.mt-sm         { margin-top: var(--space-sm); }
+.mt-md         { margin-top: var(--space-md); }
+.mt-lg         { margin-top: var(--space-lg); }
+.w-full        { width: 100%; }
+.text-center   { text-align: center; }

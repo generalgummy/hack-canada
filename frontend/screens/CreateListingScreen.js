@@ -17,12 +17,12 @@ import { useAuth } from '../context/AuthContext';
 import { createListingAPI, updateListingAPI } from '../services/api';
 
 const CATEGORIES = [
-  { key: 'meat', label: '🥩 Meat' },
-  { key: 'grains', label: '🌾 Grains' },
-  { key: 'rice', label: '🍚 Rice' },
-  { key: 'vegetables', label: '🥬 Vegetables' },
-  { key: 'dry_rations', label: '📦 Dry Rations' },
-  { key: 'other', label: '🥫 Other' },
+  { key: 'meat', label: 'Meat' },
+  { key: 'grains', label: 'Grains' },
+  { key: 'rice', label: 'Rice' },
+  { key: 'vegetables', label: 'Vegetables' },
+  { key: 'dry_rations', label: 'Dry Rations' },
+  { key: 'other', label: 'Other' },
 ];
 
 const UNITS = ['kg', 'lbs', 'units', 'cases'];
@@ -171,8 +171,8 @@ const CreateListingScreen = ({ route, navigation }) => {
         <Switch
           value={isFree}
           onValueChange={setIsFree}
-          trackColor={{ true: '#2E7D32', false: '#ccc' }}
-          thumbColor={isFree ? '#E8F5E9' : '#f4f3f4'}
+          trackColor={{ true: '#2A5C2A', false: '#D0C4A8' }}
+          thumbColor={isFree ? '#D4EDDA' : '#f4f3f4'}
         />
       </View>
 
@@ -199,7 +199,7 @@ const CreateListingScreen = ({ route, navigation }) => {
           </ScrollView>
         ) : (
           <View style={styles.uploadPlaceholder}>
-            <Text style={styles.uploadIcon}>📷</Text>
+            <Text style={styles.uploadIcon}></Text>
             <Text style={styles.uploadText}>Tap to add photos</Text>
           </View>
         )}
@@ -225,48 +225,48 @@ const CreateListingScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F9F5' },
+  container: { flex: 1, backgroundColor: '#F5E6C8' },
   scrollContent: { padding: 20, paddingTop: 60 },
-  heading: { fontSize: 24, fontWeight: '800', color: '#1B5E20', marginBottom: 20 },
-  label: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 6, marginTop: 14 },
+  heading: { fontSize: 24, fontWeight: '800', color: '#2A5C2A', marginBottom: 20, fontFamily: 'Nunito_800ExtraBold' },
+  label: { fontSize: 14, fontWeight: '600', color: '#3A3A3A', marginBottom: 6, marginTop: 14, fontFamily: 'Nunito_400Regular' },
   input: {
-    borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 14, fontSize: 16, backgroundColor: '#fff',
+    borderWidth: 1.5, borderColor: '#D0C4A8', borderRadius: 14, padding: 14, fontSize: 16, backgroundColor: '#FFFFFF', fontFamily: 'Nunito_400Regular',
   },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
-    paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20,
-    backgroundColor: '#F5F5F5', borderWidth: 1, borderColor: '#ddd',
+    paddingHorizontal: 14, paddingVertical: 10, borderRadius: 999,
+    backgroundColor: '#FAF0DC', borderWidth: 1.5, borderColor: '#D0C4A8',
   },
-  chipSelected: { backgroundColor: '#E8F5E9', borderColor: '#2E7D32' },
-  chipText: { fontSize: 13, color: '#666' },
-  chipTextSelected: { color: '#2E7D32', fontWeight: '700' },
+  chipSelected: { backgroundColor: '#D4EDDA', borderColor: '#2A5C2A' },
+  chipText: { fontSize: 13, color: '#7A7A7A', fontFamily: 'Nunito_400Regular' },
+  chipTextSelected: { color: '#2A5C2A', fontWeight: '700', fontFamily: 'Nunito_400Regular' },
   row: { flexDirection: 'row' },
   unitRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
   unitChip: {
-    paddingHorizontal: 12, paddingVertical: 10, borderRadius: 8,
-    backgroundColor: '#F5F5F5', borderWidth: 1, borderColor: '#ddd',
+    paddingHorizontal: 12, paddingVertical: 10, borderRadius: 14,
+    backgroundColor: '#FAF0DC', borderWidth: 1.5, borderColor: '#D0C4A8',
   },
-  unitChipSelected: { backgroundColor: '#E8F5E9', borderColor: '#2E7D32' },
-  unitText: { fontSize: 13, color: '#666' },
-  unitTextSelected: { color: '#2E7D32', fontWeight: '700' },
+  unitChipSelected: { backgroundColor: '#D4EDDA', borderColor: '#2A5C2A' },
+  unitText: { fontSize: 13, color: '#7A7A7A' },
+  unitTextSelected: { color: '#2A5C2A', fontWeight: '700' },
   freeRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 14,
   },
   uploadButton: {
-    borderWidth: 2, borderColor: '#ddd', borderStyle: 'dashed',
-    borderRadius: 12, overflow: 'hidden', marginTop: 4,
+    borderWidth: 2, borderColor: '#D0C4A8', borderStyle: 'dashed',
+    borderRadius: 14, overflow: 'hidden', marginTop: 4,
   },
   uploadPlaceholder: {
-    height: 100, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FAFAFA',
+    height: 100, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FAF0DC',
   },
   uploadIcon: { fontSize: 28, marginBottom: 4 },
-  uploadText: { fontSize: 13, color: '#888' },
-  previewThumb: { width: 100, height: 100, marginRight: 8, borderRadius: 8 },
+  uploadText: { fontSize: 13, color: '#7A7A7A' },
+  previewThumb: { width: 100, height: 100, marginRight: 8, borderRadius: 14 },
   submitButton: {
-    backgroundColor: '#2E7D32', borderRadius: 10, paddingVertical: 16,
-    alignItems: 'center', marginTop: 24,
+    backgroundColor: '#F5C200', borderRadius: 999, paddingVertical: 16,
+    alignItems: 'center', marginTop: 24, borderWidth: 2, borderColor: '#1A1A1A',
   },
-  submitButtonText: { color: '#fff', fontSize: 17, fontWeight: '700' },
+  submitButtonText: { color: '#1A1A1A', fontSize: 17, fontWeight: '800', fontFamily: 'Nunito_800ExtraBold' },
 });
 
 export default CreateListingScreen;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { getMyOrdersAPI } from '../services/api';
+import { Ionicons } from '@expo/vector-icons';
 import OrderCard from '../components/OrderCard';
 
 const OrdersScreen = ({ navigation }) => {
@@ -72,7 +73,7 @@ const OrdersScreen = ({ navigation }) => {
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#2E7D32" />
+          <ActivityIndicator size="large" color="#2A5C2A" />
         </View>
       ) : (
         <FlatList
@@ -85,11 +86,11 @@ const OrdersScreen = ({ navigation }) => {
             />
           )}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2E7D32']} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2A5C2A']} />
           }
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Text style={styles.emptyIcon}>📦</Text>
+              <Ionicons name="cube-outline" size={56} color="#2A5C2A" style={{ marginBottom: 8, opacity: 0.5 }} />
               <Text style={styles.emptyText}>No orders yet</Text>
             </View>
           }
@@ -101,24 +102,23 @@ const OrdersScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F9F5' },
+  container: { flex: 1, backgroundColor: '#F5E6C8' },
   header: {
     paddingTop: 60, paddingHorizontal: 20, paddingBottom: 10,
-    backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#E0E0E0',
+    backgroundColor: '#2A5C2A', borderBottomWidth: 0,
   },
-  title: { fontSize: 24, fontWeight: '800', color: '#1B5E20', marginBottom: 12 },
+  title: { fontSize: 24, fontWeight: '800', color: '#FFFFFF', marginBottom: 12, fontFamily: 'Nunito_800ExtraBold' },
   tabRow: { flexDirection: 'row', gap: 6 },
   tab: {
-    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16,
-    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
-  tabActive: { backgroundColor: '#E8F5E9' },
-  tabText: { fontSize: 12, color: '#666', fontWeight: '500' },
-  tabTextActive: { color: '#2E7D32', fontWeight: '700' },
+  tabActive: { backgroundColor: '#F5C200' },
+  tabText: { fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: '500', fontFamily: 'Nunito_400Regular' },
+  tabTextActive: { color: '#1A1A1A', fontWeight: '700', fontFamily: 'Nunito_400Regular' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   empty: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  emptyIcon: { fontSize: 48, marginBottom: 8 },
-  emptyText: { fontSize: 16, color: '#888' },
+  emptyText: { fontSize: 16, color: '#7A7A7A', fontFamily: 'Nunito_400Regular' },
 });
 
 export default OrdersScreen;

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 
 const OTP_LENGTH = 6;
@@ -31,7 +32,7 @@ const OTPScreen = () => {
 
   const handleChange = (text, index) => {
     if (text.length > 1) {
-      // Handle paste — distribute digits across inputs
+      // Handle paste â€” distribute digits across inputs
       const digits = text.replace(/[^0-9]/g, '').split('').slice(0, OTP_LENGTH);
       const newOtp = [...otp];
       digits.forEach((digit, i) => {
@@ -115,7 +116,7 @@ const OTPScreen = () => {
   };
 
   const maskedPhone = pendingOtp?.phone
-    ? '•••••' + pendingOtp.phone.slice(-4)
+    ? '\u2022\u2022\u2022\u2022\u2022' + pendingOtp.phone.slice(-4)
     : '';
 
   return (
@@ -124,7 +125,7 @@ const OTPScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.content}>
-        <Text style={styles.icon}>🔐</Text>
+        <Ionicons name="phone-portrait-outline" size={56} color="#2A5C2A" style={{ marginBottom: 16 }} />
         <Text style={styles.title}>Verify Your Phone</Text>
         <Text style={styles.subtitle}>
           We've sent a 6-digit code to{'\n'}
@@ -179,7 +180,10 @@ const OTPScreen = () => {
         </View>
 
         <TouchableOpacity style={styles.backButton} onPress={cancelOtp}>
-          <Text style={styles.backText}>← Go Back</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Ionicons name="arrow-back-outline" size={16} color="#7A7A7A" />
+            <Text style={styles.backText}>Go Back</Text>
+          </View>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -189,7 +193,7 @@ const OTPScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F9F5',
+    backgroundColor: '#F5E6C8',
   },
   content: {
     flex: 1,
@@ -204,22 +208,24 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '800',
-    color: '#1B5E20',
+    color: '#2A5C2A',
     marginBottom: 8,
+    fontFamily: 'Nunito_800ExtraBold',
   },
   subtitle: {
     fontSize: 15,
-    color: '#666',
+    color: '#7A7A7A',
     textAlign: 'center',
     lineHeight: 22,
+    fontFamily: 'Nunito_400Regular',
   },
   phone: {
     fontWeight: '700',
-    color: '#333',
+    color: '#1A1A1A',
   },
   hint: {
     fontSize: 12,
-    color: '#999',
+    color: '#7A7A7A',
     marginTop: 4,
     fontStyle: 'italic',
   },
@@ -234,21 +240,22 @@ const styles = StyleSheet.create({
     width: 48,
     height: 56,
     borderWidth: 2,
-    borderColor: '#ddd',
-    borderRadius: 12,
+    borderColor: '#D0C4A8',
+    borderRadius: 14,
     textAlign: 'center',
     fontSize: 22,
     fontWeight: '700',
-    backgroundColor: '#fff',
-    color: '#333',
+    backgroundColor: '#FFFFFF',
+    color: '#1A1A1A',
+    fontFamily: 'Nunito_400Regular',
   },
   otpInputFilled: {
-    borderColor: '#2E7D32',
-    backgroundColor: '#E8F5E9',
+    borderColor: '#2A5C2A',
+    backgroundColor: '#D4EDDA',
   },
   verifyButton: {
-    backgroundColor: '#2E7D32',
-    borderRadius: 12,
+    backgroundColor: '#2A5C2A',
+    borderRadius: 20,
     paddingVertical: 16,
     paddingHorizontal: 48,
     alignItems: 'center',
@@ -258,9 +265,10 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   verifyButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 17,
-    fontWeight: '700',
+    fontWeight: '800',
+    fontFamily: 'Nunito_800ExtraBold',
   },
   resendRow: {
     marginTop: 20,
@@ -268,20 +276,23 @@ const styles = StyleSheet.create({
   },
   countdownText: {
     fontSize: 14,
-    color: '#999',
+    color: '#7A7A7A',
+    fontFamily: 'Nunito_400Regular',
   },
   resendText: {
     fontSize: 14,
-    color: '#2E7D32',
+    color: '#2A5C2A',
     fontWeight: '600',
+    fontFamily: 'Nunito_400Regular',
   },
   backButton: {
     marginTop: 24,
   },
   backText: {
     fontSize: 15,
-    color: '#888',
+    color: '#7A7A7A',
     fontWeight: '600',
+    fontFamily: 'Nunito_400Regular',
   },
 });
 

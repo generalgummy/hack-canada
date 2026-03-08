@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -103,7 +103,7 @@ const ChatRoomScreen = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2E7D32" />
+        <ActivityIndicator size="large" color="#2A5C2A" />
       </View>
     );
   }
@@ -133,7 +133,7 @@ const ChatRoomScreen = ({ route, navigation }) => {
         ListEmptyComponent={
           <View style={styles.emptyChat}>
             <Text style={styles.emptyChatText}>
-              Start the conversation! 👋
+              Start the conversation!
             </Text>
           </View>
         }
@@ -167,28 +167,29 @@ const ChatRoomScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F9F5' },
+  container: { flex: 1, backgroundColor: '#F5E6C8' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   messagesList: { paddingVertical: 12, paddingBottom: 8 },
   emptyChat: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60 },
-  emptyChatText: { fontSize: 16, color: '#888' },
+  emptyChatText: { fontSize: 16, color: '#7A7A7A', fontFamily: 'Nunito_400Regular' },
   typingIndicator: { paddingHorizontal: 16, paddingVertical: 4 },
-  typingText: { fontSize: 12, color: '#888', fontStyle: 'italic' },
+  typingText: { fontSize: 12, color: '#7A7A7A', fontStyle: 'italic', fontFamily: 'Nunito_400Regular' },
   inputBar: {
     flexDirection: 'row', paddingHorizontal: 12, paddingVertical: 8,
-    backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#E0E0E0',
+    backgroundColor: '#FAF0DC', borderTopWidth: 1, borderTopColor: 'rgba(42,92,42,0.10)',
     alignItems: 'flex-end',
   },
   input: {
-    flex: 1, backgroundColor: '#F5F5F5', borderRadius: 20, paddingHorizontal: 16,
+    flex: 1, backgroundColor: '#FFFFFF', borderRadius: 20, paddingHorizontal: 16,
     paddingVertical: 10, fontSize: 15, maxHeight: 100, marginRight: 8,
+    borderWidth: 1, borderColor: '#D0C4A8', fontFamily: 'Nunito_400Regular',
   },
   sendButton: {
-    backgroundColor: '#2E7D32', borderRadius: 20, paddingHorizontal: 20,
+    backgroundColor: '#2A5C2A', borderRadius: 20, paddingHorizontal: 20,
     paddingVertical: 10,
   },
   sendButtonDisabled: { opacity: 0.5 },
-  sendButtonText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  sendButtonText: { color: '#FFFFFF', fontWeight: '700', fontSize: 15, fontFamily: 'Nunito_400Regular' },
 });
 
 export default ChatRoomScreen;

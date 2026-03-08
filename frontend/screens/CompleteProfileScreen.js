@@ -14,9 +14,9 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../context/AuthContext';
 
 const USER_TYPES = [
-  { key: 'hunter', label: '🏹 Hunter / Harvestor', desc: 'Sell harvested food to communities' },
-  { key: 'community', label: '🏘️ Community / School', desc: 'Order food for your community' },
-  { key: 'supplier', label: '🏭 Mass Supplier', desc: 'Supply food in bulk quantities' },
+  { key: 'hunter', label: 'Hunter / Harvestor', desc: 'Sell harvested food to communities' },
+  { key: 'community', label: 'Community / School', desc: 'Order food for your community' },
+  { key: 'supplier', label: 'Mass Supplier', desc: 'Supply food in bulk quantities' },
 ];
 
 const ORGANIZATION_TYPES = [
@@ -286,7 +286,7 @@ const CompleteProfileScreen = ({ navigation }) => {
             onPress={pickImage}
           >
             <Text style={styles.uploadButtonText}>
-              {documentImage ? '✓ Document Selected' : '📷 Choose Photo'}
+              {documentImage ? 'Document Selected' : 'Choose Photo'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -313,7 +313,7 @@ const CompleteProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F9F5',
+    backgroundColor: '#F5E6C8',
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -325,13 +325,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#1B5E20',
+    color: '#2A5C2A',
     marginBottom: 8,
+    fontFamily: 'Nunito_800ExtraBold',
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#7A7A7A',
     lineHeight: 20,
+    fontFamily: 'Nunito_400Regular',
   },
   section: {
     marginBottom: 28,
@@ -339,23 +341,26 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#333',
+    color: '#1A1A1A',
     marginBottom: 16,
+    fontFamily: 'Nunito_800ExtraBold',
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: '#3A3A3A',
     marginBottom: 8,
+    fontFamily: 'Nunito_400Regular',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
+    borderColor: '#D0C4A8',
+    borderRadius: 14,
     padding: 12,
     fontSize: 15,
-    backgroundColor: '#fff',
-    color: '#333',
+    backgroundColor: '#FFFFFF',
+    color: '#3A3A3A',
+    fontFamily: 'Nunito_400Regular',
   },
   userTypeOption: {
     flexDirection: 'row',
@@ -364,20 +369,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 12,
     borderWidth: 1.5,
-    borderColor: '#e0e0e0',
-    borderRadius: 10,
-    backgroundColor: '#fff',
+    borderColor: '#D0C4A8',
+    borderRadius: 14,
+    backgroundColor: '#FAF0DC',
   },
   userTypeOptionSelected: {
-    borderColor: '#2E7D32',
-    backgroundColor: '#F1F8F1',
+    borderColor: '#2A5C2A',
+    backgroundColor: '#D4EDDA',
   },
   userTypeRadio: {
     width: 24,
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#ddd',
+    borderColor: '#D0C4A8',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -386,17 +391,19 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#2A5C2A',
   },
   userTypeLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
+    color: '#1A1A1A',
     marginBottom: 4,
+    fontFamily: 'Nunito_400Regular',
   },
   userTypeDesc: {
     fontSize: 12,
-    color: '#999',
+    color: '#7A7A7A',
+    fontFamily: 'Nunito_400Regular',
   },
   radioOption: {
     flexDirection: 'row',
@@ -405,16 +412,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   radioOptionSelected: {
-    backgroundColor: '#F1F8F1',
+    backgroundColor: '#D4EDDA',
     paddingHorizontal: 12,
-    borderRadius: 8,
+    borderRadius: 14,
   },
   radio: {
     width: 20,
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#ddd',
+    borderColor: '#D0C4A8',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -423,45 +430,49 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#2A5C2A',
   },
   radioLabel: {
     fontSize: 14,
-    color: '#333',
+    color: '#3A3A3A',
+    fontFamily: 'Nunito_400Regular',
   },
   uploadButton: {
     paddingVertical: 16,
     paddingHorizontal: 12,
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: '#ddd',
-    borderRadius: 10,
+    borderColor: '#D0C4A8',
+    borderRadius: 14,
     alignItems: 'center',
-    backgroundColor: '#fafafa',
+    backgroundColor: '#FAF0DC',
   },
   uploadButtonSelected: {
-    borderColor: '#2E7D32',
-    backgroundColor: '#F1F8F1',
+    borderColor: '#2A5C2A',
+    backgroundColor: '#D4EDDA',
   },
   uploadButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#2E7D32',
+    color: '#2A5C2A',
   },
   submitButton: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#F5C200',
     paddingVertical: 16,
-    borderRadius: 10,
+    borderRadius: 999,
     alignItems: 'center',
     marginTop: 16,
+    borderWidth: 1.5,
+    borderColor: '#1A1A1A',
   },
   submitButtonDisabled: {
     opacity: 0.6,
   },
   submitButtonText: {
-    color: '#fff',
+    color: '#1A1A1A',
     fontSize: 16,
     fontWeight: '700',
+    fontFamily: 'Nunito_800ExtraBold',
   },
 });
 

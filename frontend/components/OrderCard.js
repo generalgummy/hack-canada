@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import StatusBadge from './StatusBadge';
 
@@ -45,16 +45,18 @@ const OrderCard = ({ order, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    backgroundColor: '#FAF0DC',
+    borderRadius: 20,
     padding: 14,
     marginHorizontal: 16,
     marginVertical: 5,
     elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowColor: '#2A5C2A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(42,92,42,0.08)',
   },
   topRow: {
     flexDirection: 'row',
@@ -65,9 +67,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1B5E20',
+    color: '#2A5C2A',
     flex: 1,
     marginRight: 8,
+    fontFamily: 'Nunito_800ExtraBold',
   },
   detailRow: {
     flexDirection: 'row',
@@ -76,18 +79,21 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    color: '#888',
+    color: '#7A7A7A',
+    fontFamily: 'Nunito_400Regular',
   },
   value: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#333',
+    color: '#1A1A1A',
+    fontFamily: 'Nunito_400Regular',
   },
   date: {
     fontSize: 11,
-    color: '#aaa',
+    color: '#7A7A7A',
     marginTop: 6,
     textAlign: 'right',
+    fontFamily: 'Nunito_400Regular',
   },
 });
 

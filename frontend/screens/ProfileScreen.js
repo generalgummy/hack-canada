@@ -12,11 +12,12 @@ import {
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { Ionicons } from '@expo/vector-icons';
 
 const USER_TYPES = [
-  { key: 'hunter', label: '🏹 Hunter / Harvestor', desc: 'Sell harvested food to communities' },
-  { key: 'community', label: '🏘️ Community / School', desc: 'Order food for your community' },
-  { key: 'supplier', label: '🏭 Mass Supplier', desc: 'Supply food in bulk quantities' },
+  { key: 'hunter', label: 'Hunter / Harvestor', desc: 'Sell harvested food to communities' },
+  { key: 'community', label: 'Community / School', desc: 'Order food for your community' },
+  { key: 'supplier', label: 'Mass Supplier', desc: 'Supply food in bulk quantities' },
 ];
 
 const ProfileScreen = ({ navigation }) => {
@@ -62,11 +63,11 @@ const ProfileScreen = ({ navigation }) => {
   const getUserTypeLabel = () => {
     switch (user?.userType) {
       case 'hunter':
-        return '🏹 Hunter / Harvestor';
+        return 'Hunter / Harvestor';
       case 'community':
-        return '🏘️ Community / School';
+        return 'Community / School';
       case 'supplier':
-        return '🏭 Mass Supplier';
+        return 'Mass Supplier';
       default:
         return user?.userType;
     }
@@ -86,7 +87,8 @@ const ProfileScreen = ({ navigation }) => {
           <Text style={styles.userType}>{getUserTypeLabel()}</Text>
           {user?.isVerified && (
             <View style={styles.verifiedBadge}>
-              <Text style={styles.verifiedText}>✅ Verified Account</Text>
+              <Ionicons name="checkmark-circle" size={13} color="#FFFFFF" />
+              <Text style={styles.verifiedText}> Verified Account</Text>
             </View>
           )}
         </View>
@@ -192,7 +194,7 @@ const ProfileScreen = ({ navigation }) => {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Status</Text>
-            <Text style={[styles.infoValue, { color: user?.isActive ? '#2E7D32' : '#C62828' }]}>
+            <Text style={[styles.infoValue, { color: user?.isActive ? '#2A5C2A' : '#C62828' }]}>
               {user?.isActive ? 'Active' : 'Inactive'}
             </Text>
           </View>
@@ -206,7 +208,8 @@ const ProfileScreen = ({ navigation }) => {
             setShowEditModal(true);
           }}
         >
-          <Text style={styles.editButtonText}>✏️ Change Account Type</Text>
+          <Ionicons name="pencil-outline" size={16} color="#4A90D9" />
+          <Text style={styles.editButtonText}> Change Account Type</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -281,88 +284,94 @@ const ProfileScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F9F5' },
+  container: { flex: 1, backgroundColor: '#F5E6C8' },
   scrollContent: { paddingBottom: 20 },
   header: {
     alignItems: 'center',
     paddingTop: 70,
     paddingBottom: 24,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    backgroundColor: '#2A5C2A',
+    borderBottomWidth: 0,
   },
   avatarContainer: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#E8F5E9',
+    backgroundColor: '#D4EDDA',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
   },
-  avatarText: { fontSize: 32, fontWeight: '800', color: '#2E7D32' },
-  name: { fontSize: 22, fontWeight: '800', color: '#1B5E20' },
-  userType: { fontSize: 14, color: '#666', marginTop: 4 },
+  avatarText: { fontSize: 32, fontWeight: '800', color: '#2A5C2A' },
+  name: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', fontFamily: 'Nunito_800ExtraBold' },
+  userType: { fontSize: 14, color: 'rgba(255,255,255,0.7)', marginTop: 4, fontFamily: 'Nunito_400Regular' },
   verifiedBadge: {
-    backgroundColor: '#E8F5E9',
+    backgroundColor: 'rgba(255,255,255,0.15)',
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 999,
     marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  verifiedText: { fontSize: 13, color: '#2E7D32', fontWeight: '600' },
+  verifiedText: { fontSize: 13, color: '#FFFFFF', fontWeight: '600', fontFamily: 'Nunito_400Regular' },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: '#FAF0DC',
+    borderRadius: 20,
     padding: 16,
     marginHorizontal: 16,
     marginTop: 12,
     elevation: 1,
-    shadowColor: '#000',
+    shadowColor: '#2A5C2A',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(42,92,42,0.08)',
   },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: '#333', marginBottom: 12 },
+  cardTitle: { fontSize: 16, fontWeight: '700', color: '#1A1A1A', marginBottom: 12, fontFamily: 'Nunito_800ExtraBold' },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 6,
   },
-  infoLabel: { fontSize: 14, color: '#888' },
+  infoLabel: { fontSize: 14, color: '#7A7A7A', fontFamily: 'Nunito_400Regular' },
   infoValue: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
+    color: '#1A1A1A',
     maxWidth: '60%',
     textAlign: 'right',
+    fontFamily: 'Nunito_400Regular',
   },
   documentImage: {
     width: '100%',
     height: 200,
-    borderRadius: 8,
+    borderRadius: 14,
     resizeMode: 'cover',
   },
   editButton: {
-    backgroundColor: '#E3F2FD',
-    borderRadius: 12,
+    backgroundColor: '#FAF0DC',
+    borderRadius: 20,
     paddingVertical: 16,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginHorizontal: 16,
     marginTop: 20,
-    borderWidth: 1,
-    borderColor: '#2196F3',
+    borderWidth: 1.5,
+    borderColor: '#4A90D9',
   },
-  editButtonText: { fontSize: 16, fontWeight: '700', color: '#2196F3' },
+  editButtonText: { fontSize: 16, fontWeight: '700', color: '#4A90D9', fontFamily: 'Nunito_400Regular' },
   logoutButton: {
     backgroundColor: '#FFEBEE',
-    borderRadius: 12,
+    borderRadius: 20,
     paddingVertical: 16,
     alignItems: 'center',
     marginHorizontal: 16,
     marginTop: 12,
   },
-  logoutText: { fontSize: 16, fontWeight: '700', color: '#C62828' },
+  logoutText: { fontSize: 16, fontWeight: '700', color: '#C62828', fontFamily: 'Nunito_400Regular' },
 
   // Modal styles
   modalOverlay: {
@@ -373,8 +382,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
+    backgroundColor: '#FAF0DC',
+    borderRadius: 28,
     padding: 24,
     width: '100%',
     maxWidth: 500,
@@ -382,14 +391,16 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#1B5E20',
+    color: '#2A5C2A',
     marginBottom: 8,
+    fontFamily: 'Nunito_800ExtraBold',
   },
   modalSubtitle: {
     fontSize: 13,
-    color: '#666',
+    color: '#7A7A7A',
     marginBottom: 20,
     lineHeight: 18,
+    fontFamily: 'Nunito_400Regular',
   },
   typeOption: {
     flexDirection: 'row',
@@ -397,20 +408,20 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginBottom: 8,
     paddingHorizontal: 12,
-    borderRadius: 12,
+    borderRadius: 20,
     borderWidth: 2,
-    borderColor: '#f0f0f0',
+    borderColor: 'rgba(42,92,42,0.10)',
   },
   typeOptionSelected: {
-    backgroundColor: '#E8F5E9',
-    borderColor: '#2E7D32',
+    backgroundColor: '#D4EDDA',
+    borderColor: '#2A5C2A',
   },
   typeRadio: {
     width: 24,
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#ccc',
+    borderColor: '#D0C4A8',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -420,17 +431,19 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#2A5C2A',
   },
   typeLabel: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1B5E20',
+    color: '#2A5C2A',
+    fontFamily: 'Nunito_400Regular',
   },
   typeDesc: {
     fontSize: 12,
-    color: '#666',
+    color: '#7A7A7A',
     marginTop: 2,
+    fontFamily: 'Nunito_400Regular',
   },
   modalButtons: {
     flexDirection: 'row',
@@ -440,21 +453,21 @@ const styles = StyleSheet.create({
   cancelButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 20,
     borderWidth: 2,
-    borderColor: '#ccc',
+    borderColor: '#D0C4A8',
     alignItems: 'center',
   },
   cancelButtonText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#666',
+    color: '#7A7A7A',
   },
   confirmButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#2E7D32',
+    borderRadius: 20,
+    backgroundColor: '#2A5C2A',
     alignItems: 'center',
   },
   confirmButtonDisabled: {
@@ -463,7 +476,7 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#fff',
+    color: '#FFFFFF',
   },
 });
 

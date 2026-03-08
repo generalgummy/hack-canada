@@ -50,7 +50,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>Hi {user?.name?.split(' ')[0]}! 👋</Text>
+        <Text style={styles.greeting}>Hi {user?.name?.split(' ')[0]}!</Text>
       </View>
 
       <FlatList
@@ -71,7 +71,7 @@ const HomeScreen = ({ navigation }) => {
           </View>
         }
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2E7D32']} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2A5C2A']} tintColor="#2A5C2A" />
         }
         contentContainerStyle={styles.listContent}
         scrollEnabled={true}
@@ -83,20 +83,19 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F9F5',
+    backgroundColor: '#F5E6C8',
   },
   header: {
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 8,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    backgroundColor: '#2A5C2A',
   },
   greeting: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1B5E20',
+    color: '#FFFFFF',
+    fontFamily: 'Nunito_800ExtraBold',
   },
   listContent: {
     paddingHorizontal: 12,
@@ -112,7 +111,8 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#999',
+    color: '#7A7A7A',
+    fontFamily: 'Nunito_400Regular',
   },
 });
 
