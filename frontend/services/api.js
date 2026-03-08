@@ -8,18 +8,38 @@ const API_URL = (process.env.EXPO_PUBLIC_API_URL || 'https://maile-inoculable-ar
 const api = axios.create({
   baseURL: API_URL,
   timeout: 30000,
+  headers: {
+    'ngrok-skip-browser-warning': 'true',
+  },
 });
 
 // Request interceptor — attach JWT
 api.interceptors.request.use(
   async (config) => {
+    // If Authorization is already set via defaults or direct header, keep it
+    if (config.headers.Authorization || api.defaults.headers.common['Authorization']) {
+      // Ensure the default header is applied to this request
+      if (!config.headers.Authorization && api.defaults.headers.common['Authorization']) {
+        config.headers.Authorization = api.defaults.headers.common['Authorization'];
+      }
+      return config;
+    }
+    // Otherwise try to load token from storage
     try {
-      const token = await SecureStore.getItemAsync('token');
+      let token = null;
+      try {
+        token = await SecureStore.getItemAsync('token');
+      } catch (e) {
+        // SecureStore fails on web — fall back to localStorage
+        if (typeof window !== 'undefined' && window.localStorage) {
+          token = window.localStorage.getItem('token');
+        }
+      }
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
     } catch (e) {
-      // SecureStore might fail on web
+      // ignore
     }
     return config;
   },

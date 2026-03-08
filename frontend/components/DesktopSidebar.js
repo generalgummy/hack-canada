@@ -8,6 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useResponsive } from '../hooks/useResponsive';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Desktop sidebar navigation for > 1024px screens
@@ -15,6 +16,7 @@ import { useResponsive } from '../hooks/useResponsive';
  */
 const DesktopSidebar = ({ state, navigation }) => {
   const { spacing } = useResponsive();
+  const { logout } = useAuth();
 
   const navigationItems = [
     { name: 'Home', icon: '🏠', label: 'Home' },
@@ -57,6 +59,10 @@ const DesktopSidebar = ({ state, navigation }) => {
       </ScrollView>
 
       <View style={styles.footer}>
+        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+          <Text style={styles.logoutIcon}>🚪</Text>
+          <Text style={styles.logoutLabel}>Logout</Text>
+        </TouchableOpacity>
         <Text style={styles.footerText}>v1.0</Text>
       </View>
     </SafeAreaView>
@@ -122,6 +128,26 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: '#2E7D32',
+  },
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    marginBottom: 10,
+    width: '80%',
+    justifyContent: 'center',
+  },
+  logoutIcon: {
+    fontSize: 18,
+    marginRight: 8,
+  },
+  logoutLabel: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   footerText: {
     fontSize: 12,

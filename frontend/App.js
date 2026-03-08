@@ -15,6 +15,9 @@ import RegisterScreen from './screens/RegisterScreen';
 import OTPScreen from './screens/OTPScreen';
 import CompleteProfileScreen from './screens/CompleteProfileScreen';
 
+// Admin Screen
+import AdminDashboard from './screens/AdminDashboard';
+
 // Dashboard Screens
 import HunterDashboard from './screens/HunterDashboard';
 import CommunityDashboard from './screens/CommunityDashboard';
@@ -124,6 +127,12 @@ const RootNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user && !needsProfileCompletion ? (
+        user.isAdmin ? (
+          // Admin Dashboard
+          <>
+            <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+          </>
+        ) : (
         // App Screens
         <>
           <Stack.Screen
@@ -174,6 +183,7 @@ const RootNavigator = () => {
             }}
           />
         </>
+        )
       ) : needsProfileCompletion ? (
         // Complete Profile Screen
         <>

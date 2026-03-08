@@ -15,22 +15,33 @@ import { useAuth } from '../context/AuthContext';
 
 const LoginScreen = ({ navigation }) => {
   const { login, loginWithSocial } = useAuth();
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  // Normal phone + password login
+  const showError = (msg) => {
+    setErrorMsg(msg);
+    if (Platform.OS !== 'web') {
+      Alert.alert('Login Failed', msg);
+    }
+  };
+
+  // Normal email + password login
   const handleNormalLogin = async () => {
-    if (!phone || !password) {
-      Alert.alert('Error', 'Please enter your phone number and password');
+    setErrorMsg('');
+    if (!email || !password) {
+      showError('Please enter your email and password');
       return;
     }
     setLoading(true);
     try {
-      await login(phone, password);
+      await login(email, password);
     } catch (error) {
-      Alert.alert('Login Failed', error.response?.data?.message || error.message || 'Please try again');
+      const msg = error.response?.data?.message || error.message || 'Please try again';
+      console.error('Login error:', msg);
+      showError(msg);
     } finally {
       setLoading(false);
     }
@@ -38,11 +49,13 @@ const LoginScreen = ({ navigation }) => {
 
   // Auth0 Google login
   const handleAuth0Login = async () => {
+    setErrorMsg('');
     setGoogleLoading(true);
     try {
       await loginWithSocial('google-oauth2');
     } catch (error) {
-      Alert.alert('Login Failed', error.message || 'Please try again');
+      const msg = error.message || 'Please try again';
+      showError(msg);
     } finally {
       setGoogleLoading(false);
     }
@@ -72,14 +85,21 @@ const LoginScreen = ({ navigation }) => {
           <Text style={styles.cardTitle}>Welcome Back</Text>
           <Text style={styles.cardText}>Sign in to your account</Text>
 
+          {/* Error Message */}
+          {errorMsg ? (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>{errorMsg}</Text>
+            </View>
+          ) : null}
+
           {/* Normal Login Form */}
           <TextInput
             style={styles.input}
-            placeholder="Phone number"
+            placeholder="Email"
             placeholderTextColor="#999"
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
             autoCapitalize="none"
           />
           <TextInput
@@ -278,6 +298,19 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     lineHeight: 16,
+  },
+  errorBox: {
+    backgroundColor: '#FFEBEE',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: '#E53935',
+  },
+  errorText: {
+    color: '#C62828',
+    fontSize: 13,
+    fontWeight: '600',
   },
 });
 

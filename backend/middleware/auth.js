@@ -4,7 +4,7 @@ const User = require('../models/User');
 // Sign JWT token
 const signToken = (user) => {
   return jwt.sign(
-    { id: user._id, userType: user.userType },
+    { id: user._id, userType: user.userType, isAdmin: user.isAdmin || false },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRE || '30d' }
   );
@@ -52,4 +52,12 @@ const restrictTo = (...types) => {
   };
 };
 
-module.exports = { signToken, protect, restrictTo };
+// Admin-only middleware
+const adminOnly = (req, res, next) => {
+  if (!req.user || !req.user.isAdmin) {
+    return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+  }
+  next();
+};
+
+module.exports = { signToken, protect, restrictTo, adminOnly };

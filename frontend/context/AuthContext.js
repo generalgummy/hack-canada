@@ -58,8 +58,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (phone, password) => {
-    const res = await api.post('/auth/login', { phone, password });
+  const login = async (email, password) => {
+    const res = await api.post('/auth/login', { email, password });
+
+    // Admin users get token directly (no OTP)
+    if (res.data.token && res.data.user) {
+      const { token: newToken, user: newUser } = res.data;
+      try {
+        await SecureStore.setItemAsync('token', newToken);
+      } catch (e) {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem('token', newToken);
+        }
+      }
+      setAuthToken(newToken);
+      setToken(newToken);
+      setUser(newUser);
+      connectSocket(newToken);
+      return newUser;
+    }
+
+    // Normal users go through OTP flow
     const { userId, phone: userPhone } = res.data;
     setPendingOtp({ userId, phone: userPhone, source: 'login' });
     return res.data;

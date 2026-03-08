@@ -113,16 +113,16 @@ router.post('/register', (req, res, next) => {
   }
 });
 
-// POST /api/auth/login — Step 1: verify phone + password, send OTP
+// POST /api/auth/login — Step 1: verify email + password, send OTP
 router.post('/login', async (req, res) => {
   try {
-    const { phone, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!phone || !password) {
-      return res.status(400).json({ message: 'Please provide phone number and password' });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Please provide email and password' });
     }
 
-    const user = await User.findOne({ phone }).select('+password');
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -130,6 +130,18 @@ router.post('/login', async (req, res) => {
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Admin users skip OTP — return token directly
+    if (user.isAdmin) {
+      user.lastSeen = new Date();
+      await user.save({ validateBeforeSave: false });
+      const token = signToken(user);
+      const userResponse = user.toObject();
+      delete userResponse.password;
+      delete userResponse.otp;
+      delete userResponse.otpExpires;
+      return res.json({ token, user: userResponse, isAdmin: true });
     }
 
     // Generate OTP

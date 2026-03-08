@@ -40,6 +40,7 @@ app.use('/api/listings', require('./routes/listings'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api/admin', require('./routes/admin')); // Admin routes
 app.use('/api', require('./routes/dev')); // Dev routes (delete users, etc.)
 
 // Auth0 Callback Page (served from backend to handle popup redirect)
