@@ -6,7 +6,9 @@ import api from './api';
 // Auth0 Configuration
 const auth0Domain = 'dev-aq644xrnfatz30d7.us.auth0.com';
 const auth0ClientId = 'o5vVpDqIsPH0zIwCP6prstxN40Uh5Ukq';
-const redirectUrl = AuthSession.getRedirectUrl();
+const redirectUrl = AuthSession.makeRedirectUri({
+  projectNameForProxy: '@luka37/northern-harvest',
+});
 
 // ============================================
 // Platform Detection

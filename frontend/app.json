@@ -2,9 +2,10 @@
   "expo": {
     "name": "Northern Harvest",
     "slug": "northern-harvest",
+    "owner": "luka37",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "",
     "userInterfaceStyle": "light",
     "splash": {
       "backgroundColor": "#1B5E20"
