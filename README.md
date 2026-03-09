@@ -417,4 +417,4 @@ docker compose down && docker compose up --build
 | Can't connect from phone  | Check URL at `http://localhost:4040`, update `api.js`   |
 | OTP not showing           | Run `docker compose logs -f backend` to see OTP in logs |
 
-- Made for Hack Canada by Tarun philip, Isla Mukheef, Abdul Lukman ❤️
+- Made for Hack Canada by Tarun philip, Isla Mukheef, Lukman ❤️
